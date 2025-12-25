@@ -1,50 +1,77 @@
-import { Link, useNavigate } from 'react-router-dom';
-import { MagnifyingGlassIcon, BellIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
-import { useAuthStore } from '@/stores/authStore';
-import { useNotificationStore } from '@/stores/notificationStore';
-import { useUIStore } from '@/stores/uiStore';
-import { Button } from '@/components/ui/Button';
+import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import {
+  MagnifyingGlassIcon,
+  BellIcon,
+  ChatBubbleLeftRightIcon,
+  Bars3Icon,
+} from "@heroicons/react/24/outline";
+import { useAuthStore } from "@/stores/authStore";
+import { useNotificationStore } from "@/stores/notificationStore";
+import { useUIStore } from "@/stores/uiStore";
+import { Button } from "@/components/ui/Button";
 
-export function Navbar() {
+interface NavbarProps {
+  showSidebarToggle?: boolean;
+}
+
+export function Navbar({ showSidebarToggle = false }: NavbarProps) {
   const navigate = useNavigate();
   const { user, isAuthenticated, signOut } = useAuthStore();
   const { unreadCount, fetchNotifications } = useNotificationStore();
-  const { showToast } = useUIStore();
+  const { showToast, toggleSidebar } = useUIStore();
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
 
   const handleSignOut = () => {
     signOut();
-    showToast('Signed out successfully', 'success');
-    navigate('/');
+    showToast("Signed out successfully", "success");
+    navigate("/");
+  };
+
+  const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      navigate(`/browse?search=${(e.target as HTMLInputElement).value}`);
+      setIsMobileSearchOpen(false);
+    }
   };
 
   return (
     <nav className="bg-white border-b border-gray-200 sticky top-0 z-40">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">S</span>
-            </div>
-            <span className="text-xl font-semibold text-gray-900">ShareSphere</span>
-          </Link>
+          <div className="flex items-center gap-2">
+            <Link to="/" className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-lg">S</span>
+              </div>
+              <span className="text-xl font-semibold text-gray-900 hidden sm:block">
+                ShareSphere
+              </span>
+            </Link>
+          </div>
 
           {isAuthenticated ? (
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 sm:gap-4">
+              {/* Desktop Search */}
               <div className="hidden md:flex items-center gap-2">
                 <div className="relative">
                   <input
                     type="text"
                     placeholder="Search items..."
                     className="w-64 px-4 py-2 pl-10 rounded-full border border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-500 focus:ring-opacity-20 outline-none text-sm"
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        navigate(`/browse?search=${(e.target as HTMLInputElement).value}`);
-                      }
-                    }}
+                    onKeyDown={handleSearch}
                   />
                   <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                 </div>
               </div>
+
+              {/* Mobile Search Toggle */}
+              <button
+                className="md:hidden p-2 rounded-full hover:bg-gray-100 transition-colors"
+                onClick={() => setIsMobileSearchOpen(!isMobileSearchOpen)}
+              >
+                <MagnifyingGlassIcon className="h-6 w-6 text-gray-600" />
+              </button>
 
               <Link
                 to="/dashboard/messages"
@@ -57,7 +84,7 @@ export function Navbar() {
               <button
                 onClick={() => {
                   fetchNotifications();
-                  navigate('/dashboard/notifications');
+                  navigate("/dashboard/notifications");
                 }}
                 className="relative p-2 rounded-full hover:bg-gray-100 transition-colors"
                 aria-label="Notifications"
@@ -65,7 +92,7 @@ export function Navbar() {
                 <BellIcon className="h-6 w-6 text-gray-600" />
                 {unreadCount > 0 && (
                   <span className="absolute top-1 right-1 h-4 w-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
-                    {unreadCount > 9 ? '9+' : unreadCount}
+                    {unreadCount > 9 ? "9+" : unreadCount}
                   </span>
                 )}
               </button>
@@ -73,8 +100,8 @@ export function Navbar() {
               <div className="relative group">
                 <button className="flex items-center gap-2 p-2 rounded-full hover:bg-gray-100 transition-colors">
                   <img
-                    src={user?.avatar || 'https://i.pravatar.cc/150?img=1'}
-                    alt={user?.name || 'User'}
+                    src={user?.avatar || "https://i.pravatar.cc/150?img=1"}
+                    alt={user?.name || "User"}
                     className="h-8 w-8 rounded-full"
                   />
                 </button>
@@ -99,14 +126,28 @@ export function Navbar() {
                   </button>
                 </div>
               </div>
+
+              {showSidebarToggle && (
+                <button
+                  onClick={toggleSidebar}
+                  className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg lg:hidden"
+                  aria-label="Toggle sidebar"
+                >
+                  <Bars3Icon className="h-6 w-6" />
+                </button>
+              )}
             </div>
           ) : (
             <div className="flex items-center gap-3">
               <Link to="/browse">
-                <Button variant="ghost" size="sm">Browse</Button>
+                <Button variant="ghost" size="sm">
+                  Browse
+                </Button>
               </Link>
               <Link to="/signin">
-                <Button variant="ghost" size="sm">Sign In</Button>
+                <Button variant="ghost" size="sm">
+                  Sign In
+                </Button>
               </Link>
               <Link to="/signup">
                 <Button size="sm">Sign Up</Button>
@@ -114,10 +155,23 @@ export function Navbar() {
             </div>
           )}
         </div>
+
+        {/* Mobile Search Bar */}
+        {isAuthenticated && isMobileSearchOpen && (
+          <div className="md:hidden py-3 border-t border-gray-100 animate-in">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search items..."
+                className="w-full px-4 py-2 pl-10 rounded-lg border border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-500 focus:ring-opacity-20 outline-none text-sm"
+                onKeyDown={handleSearch}
+                autoFocus
+              />
+              <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+            </div>
+          </div>
+        )}
       </div>
     </nav>
   );
 }
-
-
-

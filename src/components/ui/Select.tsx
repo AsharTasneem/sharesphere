@@ -1,6 +1,6 @@
-import { SelectHTMLAttributes, forwardRef } from 'react';
-import { ChevronDownIcon } from '@heroicons/react/24/outline';
-import { cn } from '@/lib/utils';
+import { SelectHTMLAttributes, forwardRef } from "react";
+import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import { cn } from "@/lib/utils";
 
 interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
   label?: string;
@@ -9,7 +9,7 @@ interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
 }
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
-  ({ label, error, options, className = '', ...props }, ref) => {
+  ({ label, error, options, className = "", ...props }, ref) => {
     return (
       <div className="w-full">
         {label && (
@@ -22,12 +22,12 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
           <select
             ref={ref}
             className={cn(
-              'w-full px-4 py-3 pr-10 rounded-full border border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-500 focus:ring-opacity-20 outline-none transition-colors bg-white appearance-none cursor-pointer text-gray-900',
-              error && 'border-red-500 focus:border-red-500 focus:ring-red-500',
+              "w-full px-4 py-3 pr-10 rounded-full border border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-500 focus:ring-opacity-20 outline-none transition-colors bg-white appearance-none cursor-pointer text-gray-900",
+              error && "border-red-500 focus:border-red-500 focus:ring-red-500",
               className
             )}
             style={{
-              backgroundImage: 'none',
+              backgroundImage: "none",
             }}
             {...props}
           >
@@ -51,7 +51,4 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
   }
 );
 
-Select.displayName = 'Select';
-
-
-
+Select.displayName = "Select";

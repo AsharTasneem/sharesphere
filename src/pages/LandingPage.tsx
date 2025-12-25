@@ -76,9 +76,9 @@ export default function LandingPage() {
   return (
     <div ref={containerRef} className="min-h-screen">
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-primary-50 to-primary-100 py-20 px-4">
+      <section className="bg-gradient-to-br from-primary-50 to-primary-100 py-12 md:py-20 px-4">
         <div className="max-w-7xl mx-auto text-center">
-          <h1 className="hero-title text-5xl md:text-6xl font-bold text-gray-900 mb-6">
+          <h1 className="hero-title text-4xl md:text-6xl font-bold text-gray-900 mb-6">
             Borrow What You Need,
             <br />
             <span className="text-primary-600">Share What You Have</span>
@@ -112,7 +112,7 @@ export default function LandingPage() {
       </section>
 
       {/* Benefits Section */}
-      <section className="benefits-section py-20 px-4 bg-white">
+      <section className="benefits-section py-12 md:py-20 px-4 bg-white">
         <div className="max-w-7xl mx-auto">
           <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
             Why ShareSphere?
@@ -162,7 +162,7 @@ export default function LandingPage() {
       </section>
 
       {/* How It Works */}
-      <section className="steps-section py-20 px-4 bg-surface">
+      <section className="steps-section py-12 md:py-20 px-4 bg-surface">
         <div className="max-w-7xl mx-auto">
           <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
             How It Works

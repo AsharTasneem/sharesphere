@@ -152,7 +152,7 @@ export default function BrowsePage() {
           <p className="text-gray-500">Try adjusting your search or filters</p>
         </div>
       ) : viewMode === "grid" ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {items.map((item) => (
             <Link
               key={item.id}

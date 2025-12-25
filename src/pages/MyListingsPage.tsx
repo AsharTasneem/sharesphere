@@ -80,7 +80,7 @@ export default function MyListingsPage() {
           </div>
         </Card>
       ) : (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {myItems.map((item) => (
             <Card key={item.id} className="listing-card opacity-0" hoverEffect>
               <img
