@@ -1,10 +1,10 @@
-import { ReactNode } from 'react';
-import { Navbar } from './Navbar';
-import { Sidebar } from './Sidebar';
-import { Toast } from '@/components/ui/Toast';
-import { useAuthStore } from '@/stores/authStore';
-import { useUIStore } from '@/stores/uiStore';
-import { Bars3Icon } from '@heroicons/react/24/outline';
+import { ReactNode } from "react";
+import { Navbar } from "./Navbar";
+import { Sidebar } from "./Sidebar";
+import { Toast } from "@/components/ui/Toast";
+import { useAuthStore } from "@/stores/authStore";
+import { useUIStore } from "@/stores/uiStore";
+import { Bars3Icon } from "@heroicons/react/24/outline";
 
 interface LayoutProps {
   children: ReactNode;
@@ -31,13 +31,8 @@ export function Layout({ children, showSidebar = true }: LayoutProps) {
           <Sidebar />
         </>
       )}
-      <main className={shouldShowSidebar ? 'lg:ml-64 pt-16' : 'pt-16'}>
-        {children}
-      </main>
+      <main className={shouldShowSidebar ? "lg:ml-64" : ""}>{children}</main>
       <Toast />
     </div>
   );
 }
-
-
-

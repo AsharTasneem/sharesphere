@@ -1,28 +1,31 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useMutation } from '@tanstack/react-query';
-import { itemsApi } from '@/services/api';
-import { useAuthStore } from '@/stores/authStore';
-import { useUIStore } from '@/stores/uiStore';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Textarea } from '@/components/ui/Textarea';
-import { Select } from '@/components/ui/Select';
-import { Card } from '@/components/ui/Card';
-import { CATEGORIES, ITEM_CONDITIONS } from '@/lib/constants';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { itemsApi } from "@/services/api";
+import { useAuthStore } from "@/stores/authStore";
+import { useUIStore } from "@/stores/uiStore";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Textarea } from "@/components/ui/Textarea";
+import { Select } from "@/components/ui/Select";
+import { Card } from "@/components/ui/Card";
+import { CATEGORIES, ITEM_CONDITIONS } from "@/lib/constants";
+import { useRef } from "react";
+import { gsap } from "gsap";
+import { useGSAP } from "@gsap/react";
 
 const listingSchema = z.object({
-  title: z.string().min(5, 'Title must be at least 5 characters'),
-  description: z.string().min(20, 'Description must be at least 20 characters'),
-  category: z.string().min(1, 'Category is required'),
-  pricePerDay: z.number().min(1, 'Price must be at least $1'),
-  deposit: z.number().min(0, 'Deposit cannot be negative'),
-  condition: z.enum(['new', 'like_new', 'good', 'fair']),
-  pickupInstructions: z.string().min(10, 'Pickup instructions are required'),
-  pickupWindow: z.string().min(1, 'Pickup window is required'),
+  title: z.string().min(5, "Title must be at least 5 characters"),
+  description: z.string().min(20, "Description must be at least 20 characters"),
+  category: z.string().min(1, "Category is required"),
+  pricePerDay: z.number().min(1, "Price must be at least $1"),
+  deposit: z.number().min(0, "Deposit cannot be negative"),
+  condition: z.enum(["new", "like_new", "good", "fair"]),
+  pickupInstructions: z.string().min(10, "Pickup instructions are required"),
+  pickupWindow: z.string().min(1, "Pickup window is required"),
 });
 
 type ListingForm = z.infer<typeof listingSchema>;
@@ -32,6 +35,7 @@ export default function CreateListingPage() {
   const { user } = useAuthStore();
   const { showToast } = useUIStore();
   const [images, setImages] = useState<string[]>([]);
+  const queryClient = useQueryClient();
 
   const {
     register,
@@ -42,35 +46,37 @@ export default function CreateListingPage() {
   } = useForm<ListingForm>({
     resolver: zodResolver(listingSchema),
     defaultValues: {
-      condition: 'good',
-      pickupWindow: 'Flexible',
+      condition: "good",
+      pickupWindow: "Flexible",
     },
   });
 
   const mutation = useMutation({
-    mutationFn: (data: ListingForm & { images: string[]; ownerId: string }) => 
+    mutationFn: (data: ListingForm & { images: string[]; ownerId: string }) =>
       itemsApi.create({
+        // ... existing create logic ...
         ...data,
-        primaryImage: data.images[0] || '',
+        primaryImage: data.images[0] || "",
         location: {
-          address: user?.location.city || '',
-          city: user?.location.city || '',
-          state: user?.location.state || '',
+          address: user?.location.city || "",
+          city: user?.location.city || "",
+          state: user?.location.state || "",
           coordinates: user?.location.coordinates || { lat: 0, lng: 0 },
           displayAddress: `${user?.location.city}, ${user?.location.state}`,
         },
         availability: {
-          type: 'always',
+          type: "always",
         },
         tags: [],
-        status: 'draft',
+        status: "published", // Set default to published so it shows up
       }),
     onSuccess: () => {
-      showToast('Listing created successfully!', 'success');
-      navigate('/dashboard/my-listings');
+      queryClient.invalidateQueries({ queryKey: ["items"] });
+      showToast("Listing created successfully!", "success");
+      navigate("/dashboard/my-listings");
     },
     onError: () => {
-      showToast('Failed to create listing', 'error');
+      showToast("Failed to create listing", "error");
     },
   });
 
@@ -78,29 +84,74 @@ export default function CreateListingPage() {
     if (!user) return;
     mutation.mutate({
       ...data,
-      images: images.length > 0 ? images : ['https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800'],
+      images:
+        images.length > 0
+          ? images
+          : ["https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800"],
       ownerId: user.id,
     });
   };
 
-  const handleImageAdd = (url: string) => {
-    if (images.length < 10) {
-      setImages([...images, url]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files && files.length > 0) {
+      const newImages = Array.from(files).map((file) =>
+        URL.createObjectURL(file)
+      );
+      if (images.length + newImages.length <= 10) {
+        setImages([...images, ...newImages]);
+      } else {
+        showToast("You can only upload up to 10 images", "error");
+      }
+    }
+    // Reset input so same file can be selected again if needed
+    if (event.target) {
+      event.target.value = "";
     }
   };
 
+  const containerRef = useRef(null);
+
+  useGSAP(
+    () => {
+      const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+      tl.from(".page-title", {
+        y: 30,
+        opacity: 0,
+        duration: 0.8,
+      }).from(
+        ".form-card",
+        {
+          y: 20,
+          opacity: 0,
+          duration: 0.6,
+          stagger: 0.1,
+        },
+        "-=0.4"
+      );
+    },
+    { scope: containerRef }
+  );
+
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">Create New Listing</h1>
+    <div
+      ref={containerRef}
+      className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
+    >
+      <h1 className="page-title text-3xl font-bold text-gray-900 mb-8">
+        Create New Listing
+      </h1>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <Card>
+        <Card className="form-card">
           <h2 className="text-xl font-semibold mb-4">Basic Information</h2>
           <div className="space-y-4">
             <Input
               label="Title"
               placeholder="e.g., Professional Camera Kit"
-              {...register('title')}
+              {...register("title")}
               error={errors.title?.message}
               required
             />
@@ -109,30 +160,33 @@ export default function CreateListingPage() {
               label="Description"
               placeholder="Describe your item in detail..."
               rows={6}
-              {...register('description')}
+              {...register("description")}
               error={errors.description?.message}
               required
             />
 
             <Select
               label="Category"
-              options={CATEGORIES.map(c => ({ value: c, label: c }))}
-              {...register('category')}
+              options={CATEGORIES.map((c) => ({ value: c, label: c }))}
+              {...register("category")}
               error={errors.category?.message}
               required
             />
 
             <Select
               label="Condition"
-              options={ITEM_CONDITIONS.map(c => ({ value: c.value, label: c.label }))}
-              {...register('condition')}
+              options={ITEM_CONDITIONS.map((c) => ({
+                value: c.value,
+                label: c.label,
+              }))}
+              {...register("condition")}
               error={errors.condition?.message}
               required
             />
           </div>
         </Card>
 
-        <Card>
+        <Card className="form-card">
           <h2 className="text-xl font-semibold mb-4">Pricing</h2>
           <div className="grid md:grid-cols-2 gap-4">
             <Input
@@ -140,7 +194,7 @@ export default function CreateListingPage() {
               type="number"
               step="0.01"
               min="1"
-              {...register('pricePerDay', { valueAsNumber: true })}
+              {...register("pricePerDay", { valueAsNumber: true })}
               error={errors.pricePerDay?.message}
               required
             />
@@ -150,39 +204,50 @@ export default function CreateListingPage() {
               type="number"
               step="0.01"
               min="0"
-              {...register('deposit', { valueAsNumber: true })}
+              {...register("deposit", { valueAsNumber: true })}
               error={errors.deposit?.message}
               required
             />
           </div>
         </Card>
 
-        <Card>
+        <Card className="form-card">
           <h2 className="text-xl font-semibold mb-4">Images</h2>
           <div className="space-y-4">
             <div className="flex gap-2">
-              <Input
-                placeholder="Image URL"
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    const input = e.target as HTMLInputElement;
-                    if (input.value) {
-                      handleImageAdd(input.value);
-                      input.value = '';
-                    }
-                  }
-                }}
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileUpload}
+                accept="image/*"
+                multiple
+                className="hidden"
               />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                Upload Images
+              </Button>
+              <span className="text-sm text-gray-500 self-center">
+                {images.length} / 10 images
+              </span>
             </div>
             {images.length > 0 && (
               <div className="grid grid-cols-4 gap-4">
                 {images.map((img, idx) => (
                   <div key={idx} className="relative">
-                    <img src={img} alt={`Image ${idx + 1}`} className="w-full h-32 object-cover rounded-lg" />
+                    <img
+                      src={img}
+                      alt={`Image ${idx + 1}`}
+                      className="w-full h-32 object-cover rounded-lg"
+                    />
                     <button
                       type="button"
-                      onClick={() => setImages(images.filter((_, i) => i !== idx))}
+                      onClick={() =>
+                        setImages(images.filter((_, i) => i !== idx))
+                      }
                       className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm"
                     >
                       ×
@@ -194,14 +259,14 @@ export default function CreateListingPage() {
           </div>
         </Card>
 
-        <Card>
+        <Card className="form-card">
           <h2 className="text-xl font-semibold mb-4">Pickup Details</h2>
           <div className="space-y-4">
             <Textarea
               label="Pickup Instructions"
               placeholder="Provide detailed instructions for pickup..."
               rows={4}
-              {...register('pickupInstructions')}
+              {...register("pickupInstructions")}
               error={errors.pickupInstructions?.message}
               required
             />
@@ -209,7 +274,7 @@ export default function CreateListingPage() {
             <Input
               label="Pickup Window"
               placeholder="e.g., Flexible, Mornings only, Weekends"
-              {...register('pickupWindow')}
+              {...register("pickupWindow")}
               error={errors.pickupWindow?.message}
               required
             />
@@ -223,7 +288,7 @@ export default function CreateListingPage() {
           <Button
             type="button"
             variant="outline"
-            onClick={() => navigate('/dashboard/my-listings')}
+            onClick={() => navigate("/dashboard/my-listings")}
           >
             Cancel
           </Button>
@@ -232,6 +297,3 @@ export default function CreateListingPage() {
     </div>
   );
 }
-
-
-

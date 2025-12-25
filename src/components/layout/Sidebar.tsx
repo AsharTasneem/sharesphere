@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation } from "react-router-dom";
 import {
   HomeIcon,
   MagnifyingGlassIcon,
@@ -10,10 +10,10 @@ import {
   ClockIcon,
   Cog6ToothIcon,
   ArrowRightOnRectangleIcon,
-} from '@heroicons/react/24/outline';
-import { useAuthStore } from '@/stores/authStore';
-import { useUIStore } from '@/stores/uiStore';
-import { cn } from '@/lib/utils';
+} from "@heroicons/react/24/outline";
+import { useAuthStore } from "@/stores/authStore";
+import { useUIStore } from "@/stores/uiStore";
+import { cn } from "@/lib/utils";
 
 export function Sidebar() {
   const location = useLocation();
@@ -21,20 +21,43 @@ export function Sidebar() {
   const { sidebarOpen, setSidebarOpen } = useUIStore();
 
   const navItems = [
-    { path: '/dashboard', label: 'Dashboard', icon: HomeIcon },
-    { path: '/browse', label: 'Browse', icon: MagnifyingGlassIcon },
-    { path: '/dashboard/messages', label: 'Messages', icon: ChatBubbleLeftRightIcon },
-    { path: '/dashboard/notifications', label: 'Notifications', icon: BellIcon },
+    { path: "/dashboard", label: "Dashboard", icon: HomeIcon, exact: true },
+    { path: "/browse", label: "Browse", icon: MagnifyingGlassIcon },
+    {
+      path: "/dashboard/messages",
+      label: "Messages",
+      icon: ChatBubbleLeftRightIcon,
+    },
+    {
+      path: "/dashboard/notifications",
+      label: "Notifications",
+      icon: BellIcon,
+    },
   ];
 
   const manageItems = [
-    { path: '/dashboard/my-listings', label: 'My Listings', icon: RectangleStackIcon },
-    { path: '/listing/new', label: 'Add Listing', icon: PlusCircleIcon },
-    { path: '/dashboard/borrowed', label: 'Borrowed', icon: ShoppingBagIcon },
-    { path: '/dashboard/lending-history', label: 'Lending History', icon: ClockIcon },
+    {
+      path: "/dashboard/my-listings",
+      label: "My Listings",
+      icon: RectangleStackIcon,
+    },
+    { path: "/listing/new", label: "Add Listing", icon: PlusCircleIcon },
+    { path: "/dashboard/borrowed", label: "Borrowed", icon: ShoppingBagIcon },
+    {
+      path: "/dashboard/lending-history",
+      label: "Lending History",
+      icon: ClockIcon,
+    },
   ];
 
-  const isActive = (path: string) => location.pathname === path || location.pathname.startsWith(path + '/');
+  const isActive = (path: string, exact = false) => {
+    if (exact) {
+      return location.pathname === path;
+    }
+    return (
+      location.pathname === path || location.pathname.startsWith(path + "/")
+    );
+  };
 
   return (
     <>
@@ -49,8 +72,8 @@ export function Sidebar() {
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed left-0 top-16 bottom-0 w-64 bg-white border-r border-gray-200 z-50 transform transition-transform duration-300 ease-in-out lg:translate-x-0',
-          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          "fixed left-0 top-16 bottom-0 w-64 bg-white border-r border-gray-200 z-50 transform transition-transform duration-300 ease-in-out lg:translate-x-0",
+          sidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
         <nav className="h-full overflow-y-auto p-4 space-y-6">
@@ -67,10 +90,10 @@ export function Sidebar() {
                     to={item.path}
                     onClick={() => setSidebarOpen(false)}
                     className={cn(
-                      'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-                      isActive(item.path)
-                        ? 'bg-primary-50 text-primary-700'
-                        : 'text-gray-700 hover:bg-gray-50'
+                      "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                      isActive(item.path, item.exact)
+                        ? "bg-primary-50 text-primary-700"
+                        : "text-gray-700 hover:bg-gray-50"
                     )}
                   >
                     <Icon className="h-5 w-5" />
@@ -94,10 +117,10 @@ export function Sidebar() {
                     to={item.path}
                     onClick={() => setSidebarOpen(false)}
                     className={cn(
-                      'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+                      "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
                       isActive(item.path)
-                        ? 'bg-primary-50 text-primary-700'
-                        : 'text-gray-700 hover:bg-gray-50'
+                        ? "bg-primary-50 text-primary-700"
+                        : "text-gray-700 hover:bg-gray-50"
                     )}
                   >
                     <Icon className="h-5 w-5" />
@@ -117,10 +140,10 @@ export function Sidebar() {
                 to="/dashboard/profile"
                 onClick={() => setSidebarOpen(false)}
                 className={cn(
-                  'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-                  isActive('/dashboard/profile')
-                    ? 'bg-primary-50 text-primary-700'
-                    : 'text-gray-700 hover:bg-gray-50'
+                  "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                  isActive("/dashboard/profile")
+                    ? "bg-primary-50 text-primary-700"
+                    : "text-gray-700 hover:bg-gray-50"
                 )}
               >
                 <Cog6ToothIcon className="h-5 w-5" />
@@ -130,10 +153,10 @@ export function Sidebar() {
                 to="/dashboard/settings"
                 onClick={() => setSidebarOpen(false)}
                 className={cn(
-                  'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-                  isActive('/dashboard/settings')
-                    ? 'bg-primary-50 text-primary-700'
-                    : 'text-gray-700 hover:bg-gray-50'
+                  "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                  isActive("/dashboard/settings")
+                    ? "bg-primary-50 text-primary-700"
+                    : "text-gray-700 hover:bg-gray-50"
                 )}
               >
                 <Cog6ToothIcon className="h-5 w-5" />
@@ -156,6 +179,3 @@ export function Sidebar() {
     </>
   );
 }
-
-
-
