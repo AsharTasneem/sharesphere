@@ -1,0 +1,237 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { useMutation } from '@tanstack/react-query';
+import { itemsApi } from '@/services/api';
+import { useAuthStore } from '@/stores/authStore';
+import { useUIStore } from '@/stores/uiStore';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Textarea } from '@/components/ui/Textarea';
+import { Select } from '@/components/ui/Select';
+import { Card } from '@/components/ui/Card';
+import { CATEGORIES, ITEM_CONDITIONS } from '@/lib/constants';
+
+const listingSchema = z.object({
+  title: z.string().min(5, 'Title must be at least 5 characters'),
+  description: z.string().min(20, 'Description must be at least 20 characters'),
+  category: z.string().min(1, 'Category is required'),
+  pricePerDay: z.number().min(1, 'Price must be at least $1'),
+  deposit: z.number().min(0, 'Deposit cannot be negative'),
+  condition: z.enum(['new', 'like_new', 'good', 'fair']),
+  pickupInstructions: z.string().min(10, 'Pickup instructions are required'),
+  pickupWindow: z.string().min(1, 'Pickup window is required'),
+});
+
+type ListingForm = z.infer<typeof listingSchema>;
+
+export default function CreateListingPage() {
+  const navigate = useNavigate();
+  const { user } = useAuthStore();
+  const { showToast } = useUIStore();
+  const [images, setImages] = useState<string[]>([]);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+    watch,
+  } = useForm<ListingForm>({
+    resolver: zodResolver(listingSchema),
+    defaultValues: {
+      condition: 'good',
+      pickupWindow: 'Flexible',
+    },
+  });
+
+  const mutation = useMutation({
+    mutationFn: (data: ListingForm & { images: string[]; ownerId: string }) => 
+      itemsApi.create({
+        ...data,
+        primaryImage: data.images[0] || '',
+        location: {
+          address: user?.location.city || '',
+          city: user?.location.city || '',
+          state: user?.location.state || '',
+          coordinates: user?.location.coordinates || { lat: 0, lng: 0 },
+          displayAddress: `${user?.location.city}, ${user?.location.state}`,
+        },
+        availability: {
+          type: 'always',
+        },
+        tags: [],
+        status: 'draft',
+      }),
+    onSuccess: () => {
+      showToast('Listing created successfully!', 'success');
+      navigate('/dashboard/my-listings');
+    },
+    onError: () => {
+      showToast('Failed to create listing', 'error');
+    },
+  });
+
+  const onSubmit = (data: ListingForm) => {
+    if (!user) return;
+    mutation.mutate({
+      ...data,
+      images: images.length > 0 ? images : ['https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800'],
+      ownerId: user.id,
+    });
+  };
+
+  const handleImageAdd = (url: string) => {
+    if (images.length < 10) {
+      setImages([...images, url]);
+    }
+  };
+
+  return (
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <h1 className="text-3xl font-bold text-gray-900 mb-8">Create New Listing</h1>
+
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <Card>
+          <h2 className="text-xl font-semibold mb-4">Basic Information</h2>
+          <div className="space-y-4">
+            <Input
+              label="Title"
+              placeholder="e.g., Professional Camera Kit"
+              {...register('title')}
+              error={errors.title?.message}
+              required
+            />
+
+            <Textarea
+              label="Description"
+              placeholder="Describe your item in detail..."
+              rows={6}
+              {...register('description')}
+              error={errors.description?.message}
+              required
+            />
+
+            <Select
+              label="Category"
+              options={CATEGORIES.map(c => ({ value: c, label: c }))}
+              {...register('category')}
+              error={errors.category?.message}
+              required
+            />
+
+            <Select
+              label="Condition"
+              options={ITEM_CONDITIONS.map(c => ({ value: c.value, label: c.label }))}
+              {...register('condition')}
+              error={errors.condition?.message}
+              required
+            />
+          </div>
+        </Card>
+
+        <Card>
+          <h2 className="text-xl font-semibold mb-4">Pricing</h2>
+          <div className="grid md:grid-cols-2 gap-4">
+            <Input
+              label="Price per Day ($)"
+              type="number"
+              step="0.01"
+              min="1"
+              {...register('pricePerDay', { valueAsNumber: true })}
+              error={errors.pricePerDay?.message}
+              required
+            />
+
+            <Input
+              label="Deposit ($)"
+              type="number"
+              step="0.01"
+              min="0"
+              {...register('deposit', { valueAsNumber: true })}
+              error={errors.deposit?.message}
+              required
+            />
+          </div>
+        </Card>
+
+        <Card>
+          <h2 className="text-xl font-semibold mb-4">Images</h2>
+          <div className="space-y-4">
+            <div className="flex gap-2">
+              <Input
+                placeholder="Image URL"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const input = e.target as HTMLInputElement;
+                    if (input.value) {
+                      handleImageAdd(input.value);
+                      input.value = '';
+                    }
+                  }
+                }}
+              />
+            </div>
+            {images.length > 0 && (
+              <div className="grid grid-cols-4 gap-4">
+                {images.map((img, idx) => (
+                  <div key={idx} className="relative">
+                    <img src={img} alt={`Image ${idx + 1}`} className="w-full h-32 object-cover rounded-lg" />
+                    <button
+                      type="button"
+                      onClick={() => setImages(images.filter((_, i) => i !== idx))}
+                      className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </Card>
+
+        <Card>
+          <h2 className="text-xl font-semibold mb-4">Pickup Details</h2>
+          <div className="space-y-4">
+            <Textarea
+              label="Pickup Instructions"
+              placeholder="Provide detailed instructions for pickup..."
+              rows={4}
+              {...register('pickupInstructions')}
+              error={errors.pickupInstructions?.message}
+              required
+            />
+
+            <Input
+              label="Pickup Window"
+              placeholder="e.g., Flexible, Mornings only, Weekends"
+              {...register('pickupWindow')}
+              error={errors.pickupWindow?.message}
+              required
+            />
+          </div>
+        </Card>
+
+        <div className="flex gap-3">
+          <Button type="submit" loading={mutation.isPending}>
+            Create Listing
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => navigate('/dashboard/my-listings')}
+          >
+            Cancel
+          </Button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+
+
