@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
@@ -29,6 +29,19 @@ export function Sidebar() {
   const sidebarRef = useRef<HTMLElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
   const navContainerRef = useRef<HTMLDivElement>(null);
+
+  // Close sidebar on window resize to prevent stuck state
+  useEffect(() => {
+    const handleResize = () => {
+      // Always close sidebar when resizing
+      if (sidebarOpen) {
+        setSidebarOpen(false);
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, [sidebarOpen, setSidebarOpen]);
 
   useGSAP(
     () => {
@@ -82,8 +95,18 @@ export function Sidebar() {
         gsap.set(".nav-item", { x: 0, opacity: 1 });
       });
     },
-    { scope: sidebarRef, dependencies: [sidebarOpen] } // Scope mainly for selectors if needed, but refs are direct
+    { scope: sidebarRef, dependencies: [sidebarOpen] }
   );
+
+  // Set initial closed state on mount for mobile
+  useEffect(() => {
+    if (sidebarRef.current && overlayRef.current) {
+      if (window.innerWidth < 1024) {
+        gsap.set(sidebarRef.current, { x: "100%" });
+        gsap.set(overlayRef.current, { autoAlpha: 0 });
+      }
+    }
+  }, []);
 
   // Note: overlayRef is outside sidebarRef scope usually, so we might need to scope strictly or just use global selectors if safely unique?
   // Actually refs are safer. `scope` in useGSAP defaults to clean up GSAP instances.

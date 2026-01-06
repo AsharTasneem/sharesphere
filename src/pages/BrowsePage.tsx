@@ -4,7 +4,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { itemsApi } from "@/services/api";
 import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
-import { Select } from "@/components/ui/Select";
+import { CustomSelect } from "@/components/ui/CustomSelect";
 import { Badge } from "@/components/ui/Badge";
 import { formatCurrency } from "@/lib/utils";
 import { CATEGORIES, SORT_OPTIONS } from "@/lib/constants";
@@ -76,35 +76,36 @@ export default function BrowsePage() {
             />
           </div>
           <div className="w-full md:w-48">
-            <Select
+            <CustomSelect
               options={[
                 { value: "", label: "All Categories" },
                 ...CATEGORIES.map((c) => ({ value: c, label: c })),
               ]}
               value={category}
-              onChange={(e) => {
-                setCategory(e.target.value);
+              onChange={(value) => {
+                setCategory(value);
                 const params = new URLSearchParams(searchParams);
-                if (e.target.value) {
-                  params.set("category", e.target.value);
+                if (value) {
+                  params.set("category", value);
                 } else {
                   params.delete("category");
                 }
                 setSearchParams(params);
               }}
+              // searchable
             />
           </div>
           <div className="w-full md:w-48">
-            <Select
+            <CustomSelect
               options={SORT_OPTIONS.map((o) => ({
                 value: o.value,
                 label: o.label,
               }))}
               value={sort}
-              onChange={(e) => {
-                setSort(e.target.value);
+              onChange={(value) => {
+                setSort(value);
                 const params = new URLSearchParams(searchParams);
-                params.set("sort", e.target.value);
+                params.set("sort", value);
                 setSearchParams(params);
               }}
             />

@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -10,10 +10,9 @@ import { useUIStore } from "@/stores/uiStore";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
-import { Select } from "@/components/ui/Select";
+import { CustomSelect } from "@/components/ui/CustomSelect";
 import { Card } from "@/components/ui/Card";
-import { CATEGORIES, ITEM_CONDITIONS } from "@/lib/constants";
-import { useRef } from "react";
+import { CATEGORIES, ITEM_CONDITIONS, PICKUP_WINDOWS } from "@/lib/constants";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 
@@ -35,17 +34,18 @@ export default function CreateListingPage() {
   const { user } = useAuthStore();
   const { showToast } = useUIStore();
   const [images, setImages] = useState<string[]>([]);
+
   const queryClient = useQueryClient();
 
   const {
     register,
     handleSubmit,
+    control,
     formState: { errors },
-    setValue,
-    watch,
   } = useForm<ListingForm>({
     resolver: zodResolver(listingSchema),
     defaultValues: {
+      category: "",
       condition: "good",
       pickupWindow: "Flexible",
     },
@@ -165,24 +165,54 @@ export default function CreateListingPage() {
               required
             />
 
-            <Select
-              label="Category"
-              options={CATEGORIES.map((c) => ({ value: c, label: c }))}
-              {...register("category")}
-              error={errors.category?.message}
-              required
-            />
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Category <span className="text-red-500">*</span>
+              </label>
+              <Controller
+                name="category"
+                control={control}
+                render={({ field }) => (
+                  <CustomSelect
+                    options={CATEGORIES.map((c) => ({ value: c, label: c }))}
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder="Select a category"
+                  />
+                )}
+              />
+              {errors.category && (
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.category.message}
+                </p>
+              )}
+            </div>
 
-            <Select
-              label="Condition"
-              options={ITEM_CONDITIONS.map((c) => ({
-                value: c.value,
-                label: c.label,
-              }))}
-              {...register("condition")}
-              error={errors.condition?.message}
-              required
-            />
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Condition <span className="text-red-500">*</span>
+              </label>
+              <Controller
+                name="condition"
+                control={control}
+                render={({ field }) => (
+                  <CustomSelect
+                    options={ITEM_CONDITIONS.map((o) => ({
+                      value: o.value,
+                      label: o.label,
+                    }))}
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder="Select condition"
+                  />
+                )}
+              />
+              {errors.condition && (
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.condition.message}
+                </p>
+              )}
+            </div>
           </div>
         </Card>
 
@@ -208,6 +238,46 @@ export default function CreateListingPage() {
               error={errors.deposit?.message}
               required
             />
+          </div>
+        </Card>
+
+        <Card className="form-card">
+          <h2 className="text-xl font-semibold mb-4">Pickup Details</h2>
+          <div className="space-y-4">
+            <Textarea
+              label="Pickup Instructions"
+              placeholder="Provide detailed instructions for pickup..."
+              rows={4}
+              {...register("pickupInstructions")}
+              error={errors.pickupInstructions?.message}
+              required
+            />
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Pickup Window <span className="text-red-500">*</span>
+              </label>
+              <Controller
+                name="pickupWindow"
+                control={control}
+                render={({ field }) => (
+                  <CustomSelect
+                    options={PICKUP_WINDOWS.map((w) => ({
+                      value: w,
+                      label: w,
+                    }))}
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder="Select pickup window"
+                  />
+                )}
+              />
+              {errors.pickupWindow && (
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.pickupWindow.message}
+                </p>
+              )}
+            </div>
           </div>
         </Card>
 
@@ -256,28 +326,6 @@ export default function CreateListingPage() {
                 ))}
               </div>
             )}
-          </div>
-        </Card>
-
-        <Card className="form-card">
-          <h2 className="text-xl font-semibold mb-4">Pickup Details</h2>
-          <div className="space-y-4">
-            <Textarea
-              label="Pickup Instructions"
-              placeholder="Provide detailed instructions for pickup..."
-              rows={4}
-              {...register("pickupInstructions")}
-              error={errors.pickupInstructions?.message}
-              required
-            />
-
-            <Input
-              label="Pickup Window"
-              placeholder="e.g., Flexible, Mornings only, Weekends"
-              {...register("pickupWindow")}
-              error={errors.pickupWindow?.message}
-              required
-            />
           </div>
         </Card>
 
