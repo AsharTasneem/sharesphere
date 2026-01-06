@@ -1,41 +1,46 @@
-import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { useAuthStore } from '@/stores/authStore';
-import { useUIStore } from '@/stores/uiStore';
-import { requestsApi, itemsApi } from '@/services/api';
-import { Card } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
-import { Input } from '@/components/ui/Input';
-import { formatCurrency, formatDate, calculatePricing, isValidDateRange } from '@/lib/utils';
+import { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { useAuthStore } from "@/stores/authStore";
+import { useUIStore } from "@/stores/uiStore";
+import { requestsApi, itemsApi } from "@/services/api";
+import { Card } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
+import { Input } from "@/components/ui/Input";
+import {
+  formatCurrency,
+  formatDate,
+  calculatePricing,
+  isValidDateRange,
+} from "@/lib/utils";
 
 export default function RequestDetailPage() {
   const { itemId, id } = useParams<{ itemId?: string; id?: string }>();
   const navigate = useNavigate();
   const { user } = useAuthStore();
   const { showToast } = useUIStore();
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
   const isCreating = !!itemId && !id;
-  const requestId = id || '';
+  const requestId = id || "";
 
   const { data: item, isLoading: itemLoading } = useQuery({
-    queryKey: ['item', itemId],
+    queryKey: ["item", itemId],
     queryFn: () => itemsApi.getById(itemId!),
     enabled: !!itemId,
   });
 
   const { data: request, isLoading: requestLoading } = useQuery({
-    queryKey: ['request', requestId],
+    queryKey: ["request", requestId],
     queryFn: () => requestsApi.getById(requestId),
     enabled: !!requestId,
   });
 
   if (isCreating && itemLoading) {
     return (
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="animate-pulse">
           <div className="h-8 bg-gray-200 rounded w-1/3 mb-8" />
           <div className="h-64 bg-gray-200 rounded-lg mb-6" />
@@ -46,7 +51,7 @@ export default function RequestDetailPage() {
 
   if (requestId && requestLoading) {
     return (
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="animate-pulse">
           <div className="h-8 bg-gray-200 rounded w-1/3 mb-8" />
           <div className="h-64 bg-gray-200 rounded-lg" />
@@ -56,7 +61,15 @@ export default function RequestDetailPage() {
   }
 
   const createMutation = useMutation({
-    mutationFn: (data: { itemId: string; startDate: Date; endDate: Date; borrowerId: string; ownerId: string; pricePerDay: number; deposit: number }) => {
+    mutationFn: (data: {
+      itemId: string;
+      startDate: Date;
+      endDate: Date;
+      borrowerId: string;
+      ownerId: string;
+      pricePerDay: number;
+      deposit: number;
+    }) => {
       const pricing = calculatePricing(
         data.pricePerDay,
         data.deposit,
@@ -69,7 +82,7 @@ export default function RequestDetailPage() {
         endDate: data.endDate,
         borrowerId: data.borrowerId,
         ownerId: data.ownerId,
-        status: 'pending_owner',
+        status: "pending_owner",
         pricing: {
           pricePerDay: data.pricePerDay,
           days: pricing.days,
@@ -81,11 +94,11 @@ export default function RequestDetailPage() {
       });
     },
     onSuccess: () => {
-      showToast('Request created successfully!', 'success');
-      navigate('/dashboard/borrowed');
+      showToast("Request created successfully!", "success");
+      navigate("/dashboard/borrowed");
     },
     onError: () => {
-      showToast('Failed to create request', 'error');
+      showToast("Failed to create request", "error");
     },
   });
 
@@ -97,7 +110,7 @@ export default function RequestDetailPage() {
     const validation = isValidDateRange(start, end, item);
 
     if (!validation.valid) {
-      showToast(validation.error || 'Invalid date range', 'error');
+      showToast(validation.error || "Invalid date range", "error");
       return;
     }
 
@@ -113,13 +126,21 @@ export default function RequestDetailPage() {
   };
 
   if (isCreating && item) {
-    const pricing = startDate && endDate
-      ? calculatePricing(item.pricePerDay, item.deposit, new Date(startDate), new Date(endDate))
-      : null;
+    const pricing =
+      startDate && endDate
+        ? calculatePricing(
+            item.pricePerDay,
+            item.deposit,
+            new Date(startDate),
+            new Date(endDate)
+          )
+        : null;
 
     return (
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Request to Borrow</h1>
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">
+          Request to Borrow
+        </h1>
 
         <div className="grid lg:grid-cols-2 gap-8">
           <div>
@@ -133,7 +154,9 @@ export default function RequestDetailPage() {
               <p className="text-gray-600 mb-4">{item.description}</p>
               <div className="flex items-center justify-between">
                 <div>
-                  <span className="text-2xl font-bold text-primary-600">{formatCurrency(item.pricePerDay)}</span>
+                  <span className="text-2xl font-bold text-primary-600">
+                    {formatCurrency(item.pricePerDay)}
+                  </span>
                   <span className="text-gray-500">/day</span>
                 </div>
                 <Badge>{item.category}</Badge>
@@ -150,7 +173,7 @@ export default function RequestDetailPage() {
                   type="date"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
-                  min={new Date().toISOString().split('T')[0]}
+                  min={new Date().toISOString().split("T")[0]}
                   required
                 />
                 <Input
@@ -158,7 +181,7 @@ export default function RequestDetailPage() {
                   type="date"
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
-                  min={startDate || new Date().toISOString().split('T')[0]}
+                  min={startDate || new Date().toISOString().split("T")[0]}
                   required
                 />
               </div>
@@ -166,24 +189,36 @@ export default function RequestDetailPage() {
 
             {pricing && (
               <Card className="mb-6">
-                <h3 className="font-semibold text-gray-900 mb-4">Pricing Breakdown</h3>
+                <h3 className="font-semibold text-gray-900 mb-4">
+                  Pricing Breakdown
+                </h3>
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Rental Fee ({pricing.days} days)</span>
-                    <span className="font-medium">{formatCurrency(pricing.rentalFee)}</span>
+                    <span className="text-gray-600">
+                      Rental Fee ({pricing.days} days)
+                    </span>
+                    <span className="font-medium">
+                      {formatCurrency(pricing.rentalFee)}
+                    </span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Service Fee (15%)</span>
-                    <span className="font-medium">{formatCurrency(pricing.serviceFee)}</span>
+                    <span className="font-medium">
+                      {formatCurrency(pricing.serviceFee)}
+                    </span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Deposit (refundable)</span>
-                    <span className="font-medium">{formatCurrency(pricing.deposit)}</span>
+                    <span className="font-medium">
+                      {formatCurrency(pricing.deposit)}
+                    </span>
                   </div>
                   <div className="border-t border-gray-200 pt-2 mt-2">
                     <div className="flex justify-between font-semibold">
                       <span>Total</span>
-                      <span className="text-primary-600">{formatCurrency(pricing.total)}</span>
+                      <span className="text-primary-600">
+                        {formatCurrency(pricing.total)}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -207,19 +242,26 @@ export default function RequestDetailPage() {
 
   if (request) {
     return (
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Request Details</h1>
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">
+          Request Details
+        </h1>
 
         <Card>
           <div className="flex items-center gap-4 mb-6">
             <img
-              src={request.item?.primaryImage || 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800'}
+              src={
+                request.item?.primaryImage ||
+                "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800"
+              }
               alt={request.item?.title}
               className="w-32 h-32 object-cover rounded-lg"
             />
             <div className="flex-1">
-              <h2 className="text-xl font-semibold mb-2">{request.item?.title}</h2>
-              <Badge variant="info">{request.status.replace('_', ' ')}</Badge>
+              <h2 className="text-xl font-semibold mb-2">
+                {request.item?.title}
+              </h2>
+              <Badge variant="info">{request.status.replace("_", " ")}</Badge>
             </div>
           </div>
 
@@ -248,7 +290,9 @@ export default function RequestDetailPage() {
                 </div>
                 <div className="flex justify-between font-semibold pt-2 border-t">
                   <span>Total</span>
-                  <span className="text-primary-600">{formatCurrency(request.pricing.total)}</span>
+                  <span className="text-primary-600">
+                    {formatCurrency(request.pricing.total)}
+                  </span>
                 </div>
               </div>
             </div>
@@ -260,4 +304,3 @@ export default function RequestDetailPage() {
 
   return null;
 }
-

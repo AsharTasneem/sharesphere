@@ -1,17 +1,22 @@
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/Button';
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/Button";
 
 export default function HowItWorksPage() {
   return (
     <div className="min-h-screen py-12 px-4">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-4xl font-bold text-center mb-12">How ShareSphere Works</h1>
-        
+      <div className="max-w-5xl mx-auto">
+        <h1 className="text-4xl font-bold text-center mb-12">
+          How ShareSphere Works
+        </h1>
+
         <div className="space-y-12">
           <section>
             <h2 className="text-2xl font-semibold mb-4">For Borrowers</h2>
             <div className="space-y-4 text-gray-700">
-              <p>ShareSphere makes it easy to borrow items from people in your community.</p>
+              <p>
+                ShareSphere makes it easy to borrow items from people in your
+                community.
+              </p>
               <ol className="list-decimal list-inside space-y-2 ml-4">
                 <li>Browse available items in your area</li>
                 <li>Send a borrow request with your desired dates</li>
@@ -27,7 +32,10 @@ export default function HowItWorksPage() {
           <section>
             <h2 className="text-2xl font-semibold mb-4">For Lenders</h2>
             <div className="space-y-4 text-gray-700">
-              <p>Turn your unused items into income by sharing them with your community.</p>
+              <p>
+                Turn your unused items into income by sharing them with your
+                community.
+              </p>
               <ol className="list-decimal list-inside space-y-2 ml-4">
                 <li>Create a listing with photos and details</li>
                 <li>Set your price per day and deposit amount</li>
@@ -64,6 +72,3 @@ export default function HowItWorksPage() {
     </div>
   );
 }
-
-
-

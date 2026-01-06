@@ -1,20 +1,20 @@
-import { useParams, Link } from 'react-router-dom';
-import { useState, useEffect, useRef } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { useAuthStore } from '@/stores/authStore';
-import { useMessageStore } from '@/stores/messageStore';
-import { messagesApi } from '@/services/api';
-import { Card } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { formatDateTime, getRelativeTime } from '@/lib/utils';
-import { PaperAirplaneIcon } from '@heroicons/react/24/outline';
+import { useParams, Link } from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useAuthStore } from "@/stores/authStore";
+import { useMessageStore } from "@/stores/messageStore";
+import { messagesApi } from "@/services/api";
+import { Card } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { formatDateTime, getRelativeTime } from "@/lib/utils";
+import { PaperAirplaneIcon } from "@heroicons/react/24/outline";
 
 export default function MessagesPage() {
   const { requestId } = useParams<{ requestId?: string }>();
   const { user } = useAuthStore();
   const { conversations, fetchMessages, sendMessage } = useMessageStore();
-  const [messageText, setMessageText] = useState('');
+  const [messageText, setMessageText] = useState("");
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -27,7 +27,7 @@ export default function MessagesPage() {
   }, [requestId, fetchMessages]);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   const handleSend = async () => {
@@ -35,16 +35,17 @@ export default function MessagesPage() {
 
     setSending(true);
     try {
-      const recipientId = messages[0]?.senderId === user.id 
-        ? messages[0]?.recipientId 
-        : messages[0]?.senderId;
-      
+      const recipientId =
+        messages[0]?.senderId === user.id
+          ? messages[0]?.recipientId
+          : messages[0]?.senderId;
+
       if (recipientId) {
         await sendMessage(requestId, messageText, user.id, recipientId);
-        setMessageText('');
+        setMessageText("");
       }
     } catch (error) {
-      console.error('Failed to send message:', error);
+      console.error("Failed to send message:", error);
     } finally {
       setSending(false);
     }
@@ -55,16 +56,21 @@ export default function MessagesPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h1 className="text-2xl font-bold mb-4">Messages</h1>
         <Card>
-          <p className="text-gray-600">Select a conversation to view messages</p>
+          <p className="text-gray-600">
+            Select a conversation to view messages
+          </p>
         </Card>
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-4">
-        <Link to="/dashboard/messages" className="text-primary-600 hover:text-primary-700 text-sm">
+        <Link
+          to="/dashboard/messages"
+          className="text-primary-600 hover:text-primary-700 text-sm"
+        >
           ← Back to conversations
         </Link>
       </div>
@@ -76,16 +82,26 @@ export default function MessagesPage() {
             return (
               <div
                 key={message.id}
-                className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
+                className={`flex ${isOwn ? "justify-end" : "justify-start"}`}
               >
-                <div className={`max-w-xs lg:max-w-md ${isOwn ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-900'} rounded-lg px-4 py-2`}>
+                <div
+                  className={`max-w-xs lg:max-w-md ${
+                    isOwn
+                      ? "bg-primary-600 text-white"
+                      : "bg-gray-100 text-gray-900"
+                  } rounded-lg px-4 py-2`}
+                >
                   {!isOwn && (
                     <p className="text-xs font-medium mb-1 opacity-75">
-                      {message.sender?.name || 'Unknown'}
+                      {message.sender?.name || "Unknown"}
                     </p>
                   )}
                   <p className="text-sm">{message.text}</p>
-                  <p className={`text-xs mt-1 ${isOwn ? 'text-primary-100' : 'text-gray-500'}`}>
+                  <p
+                    className={`text-xs mt-1 ${
+                      isOwn ? "text-primary-100" : "text-gray-500"
+                    }`}
+                  >
                     {getRelativeTime(message.createdAt)}
                   </p>
                 </div>
@@ -101,7 +117,7 @@ export default function MessagesPage() {
               value={messageText}
               onChange={(e) => setMessageText(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
+                if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
                   handleSend();
                 }
@@ -109,7 +125,10 @@ export default function MessagesPage() {
               placeholder="Type a message..."
               className="flex-1"
             />
-            <Button onClick={handleSend} disabled={!messageText.trim() || sending}>
+            <Button
+              onClick={handleSend}
+              disabled={!messageText.trim() || sending}
+            >
               <PaperAirplaneIcon className="h-5 w-5" />
             </Button>
           </div>
@@ -118,6 +137,3 @@ export default function MessagesPage() {
     </div>
   );
 }
-
-
-

@@ -1,62 +1,66 @@
-import { useState } from 'react';
-import { useAuthStore } from '@/stores/authStore';
-import { Card } from '@/components/ui/Card';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { Badge } from '@/components/ui/Badge';
-import { useUIStore } from '@/stores/uiStore';
-import { 
-  EnvelopeIcon, 
-  PhoneIcon, 
-  IdentificationIcon, 
+import { useState } from "react";
+import { useAuthStore } from "@/stores/authStore";
+import { Card } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Badge } from "@/components/ui/Badge";
+import { useUIStore } from "@/stores/uiStore";
+import {
+  EnvelopeIcon,
+  PhoneIcon,
+  IdentificationIcon,
   MapPinIcon,
   LockClosedIcon,
   BellIcon,
-  CreditCardIcon
-} from '@heroicons/react/24/outline';
+  CreditCardIcon,
+} from "@heroicons/react/24/outline";
 
 export default function AccountSettingsPage() {
   const { user, updateProfile } = useAuthStore();
   const { showToast } = useUIStore();
-  const [email, setEmail] = useState(user?.email || '');
-  const [phone, setPhone] = useState(user?.phone || '');
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [email, setEmail] = useState(user?.email || "");
+  const [phone, setPhone] = useState(user?.phone || "");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   if (!user) return null;
 
   const handleSaveEmail = async () => {
     await updateProfile({ email });
-    showToast('Email updated successfully', 'success');
+    showToast("Email updated successfully", "success");
   };
 
   const handleSavePhone = async () => {
     await updateProfile({ phone });
-    showToast('Phone number updated successfully', 'success');
+    showToast("Phone number updated successfully", "success");
   };
 
   const handleChangePassword = async () => {
     if (newPassword !== confirmPassword) {
-      showToast('Passwords do not match', 'error');
+      showToast("Passwords do not match", "error");
       return;
     }
     if (newPassword.length < 6) {
-      showToast('Password must be at least 6 characters', 'error');
+      showToast("Password must be at least 6 characters", "error");
       return;
     }
     // In a real app, this would call an API
-    showToast('Password changed successfully', 'success');
-    setCurrentPassword('');
-    setNewPassword('');
-    setConfirmPassword('');
+    showToast("Password changed successfully", "success");
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Account Settings</h1>
-        <p className="text-gray-600">Manage your account information and preferences</p>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          Account Settings
+        </h1>
+        <p className="text-gray-600">
+          Manage your account information and preferences
+        </p>
       </div>
 
       {/* Email Settings */}
@@ -74,7 +78,9 @@ export default function AccountSettingsPage() {
               onChange={(e) => setEmail(e.target.value)}
             />
             {user.verification.email && (
-              <Badge variant="success" className="mt-2">Verified</Badge>
+              <Badge variant="success" className="mt-2">
+                Verified
+              </Badge>
             )}
           </div>
           <Button onClick={handleSaveEmail}>Update Email</Button>
@@ -97,7 +103,9 @@ export default function AccountSettingsPage() {
               placeholder="+1234567890"
             />
             {user.verification.phone && (
-              <Badge variant="success" className="mt-2">Verified</Badge>
+              <Badge variant="success" className="mt-2">
+                Verified
+              </Badge>
             )}
           </div>
           <Button onClick={handleSavePhone}>Update Phone</Button>
@@ -146,23 +154,31 @@ export default function AccountSettingsPage() {
           <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
             <div className="flex items-center gap-2">
               <EnvelopeIcon className="h-5 w-5 text-gray-400" />
-              <span className="text-gray-700 font-medium">Email Verification</span>
+              <span className="text-gray-700 font-medium">
+                Email Verification
+              </span>
             </div>
             {user.verification.email ? (
               <Badge variant="success">Verified</Badge>
             ) : (
-              <Button variant="outline" size="sm">Verify Now</Button>
+              <Button variant="outline" size="sm">
+                Verify Now
+              </Button>
             )}
           </div>
           <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
             <div className="flex items-center gap-2">
               <PhoneIcon className="h-5 w-5 text-gray-400" />
-              <span className="text-gray-700 font-medium">Phone Verification</span>
+              <span className="text-gray-700 font-medium">
+                Phone Verification
+              </span>
             </div>
             {user.verification.phone ? (
               <Badge variant="success">Verified</Badge>
             ) : (
-              <Button variant="outline" size="sm">Verify Now</Button>
+              <Button variant="outline" size="sm">
+                Verify Now
+              </Button>
             )}
           </div>
           <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
@@ -170,23 +186,29 @@ export default function AccountSettingsPage() {
               <IdentificationIcon className="h-5 w-5 text-gray-400" />
               <span className="text-gray-700 font-medium">Government ID</span>
             </div>
-            {user.verification.governmentId === 'verified' ? (
+            {user.verification.governmentId === "verified" ? (
               <Badge variant="success">Verified</Badge>
-            ) : user.verification.governmentId === 'pending' ? (
+            ) : user.verification.governmentId === "pending" ? (
               <Badge variant="warning">Pending Review</Badge>
             ) : (
-              <Button variant="outline" size="sm">Verify Now</Button>
+              <Button variant="outline" size="sm">
+                Verify Now
+              </Button>
             )}
           </div>
           <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
             <div className="flex items-center gap-2">
               <MapPinIcon className="h-5 w-5 text-gray-400" />
-              <span className="text-gray-700 font-medium">Address Verification</span>
+              <span className="text-gray-700 font-medium">
+                Address Verification
+              </span>
             </div>
             {user.verification.address ? (
               <Badge variant="success">Verified</Badge>
             ) : (
-              <Button variant="outline" size="sm">Verify Now</Button>
+              <Button variant="outline" size="sm">
+                Verify Now
+              </Button>
             )}
           </div>
         </div>
@@ -201,13 +223,17 @@ export default function AccountSettingsPage() {
         {user.payoutMethod ? (
           <div className="p-4 bg-gray-50 rounded-lg">
             <p className="text-gray-700 mb-2">
-              {user.payoutMethod.type === 'bank' ? 'Bank Account' : 'PayPal'}
+              {user.payoutMethod.type === "bank" ? "Bank Account" : "PayPal"}
             </p>
             {user.payoutMethod.last4 && (
-              <p className="text-sm text-gray-500">•••• {user.payoutMethod.last4}</p>
+              <p className="text-sm text-gray-500">
+                •••• {user.payoutMethod.last4}
+              </p>
             )}
             {user.payoutMethod.verified && (
-              <Badge variant="success" className="mt-2">Verified</Badge>
+              <Badge variant="success" className="mt-2">
+                Verified
+              </Badge>
             )}
           </div>
         ) : (
@@ -222,19 +248,30 @@ export default function AccountSettingsPage() {
       <Card>
         <div className="flex items-center gap-2 mb-4">
           <BellIcon className="h-5 w-5 text-primary-600" />
-          <h3 className="font-semibold text-gray-900">Notification Preferences</h3>
+          <h3 className="font-semibold text-gray-900">
+            Notification Preferences
+          </h3>
         </div>
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="font-medium text-gray-900">Email Notifications</p>
-              <p className="text-sm text-gray-600">Receive email updates about your account</p>
+              <p className="text-sm text-gray-600">
+                Receive email updates about your account
+              </p>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
               <input
                 type="checkbox"
                 checked={user.preferences.emailDigest}
-                onChange={(e) => updateProfile({ preferences: { ...user.preferences, emailDigest: e.target.checked } })}
+                onChange={(e) =>
+                  updateProfile({
+                    preferences: {
+                      ...user.preferences,
+                      emailDigest: e.target.checked,
+                    },
+                  })
+                }
                 className="sr-only peer"
               />
               <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
@@ -243,13 +280,22 @@ export default function AccountSettingsPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="font-medium text-gray-900">Push Notifications</p>
-              <p className="text-sm text-gray-600">Receive browser push notifications</p>
+              <p className="text-sm text-gray-600">
+                Receive browser push notifications
+              </p>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
               <input
                 type="checkbox"
                 checked={user.preferences.pushEnabled}
-                onChange={(e) => updateProfile({ preferences: { ...user.preferences, pushEnabled: e.target.checked } })}
+                onChange={(e) =>
+                  updateProfile({
+                    preferences: {
+                      ...user.preferences,
+                      pushEnabled: e.target.checked,
+                    },
+                  })
+                }
                 className="sr-only peer"
               />
               <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
@@ -260,4 +306,3 @@ export default function AccountSettingsPage() {
     </div>
   );
 }
-
