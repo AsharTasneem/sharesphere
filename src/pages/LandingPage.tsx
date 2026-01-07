@@ -8,16 +8,88 @@ import {
   CurrencyDollarIcon,
   UserGroupIcon,
   SparklesIcon,
+  ChartBarIcon,
+  GlobeAltIcon,
+  ChatBubbleLeftRightIcon,
+  ArrowPathIcon,
 } from "@heroicons/react/24/outline";
 import { Button } from "@/components/ui/Button";
-import { Card } from "@/components/ui/Card";
 import { useAuthStore } from "@/stores/authStore";
 import DroppingTextsGSAP from "@/components/layout/DroppingText";
+import ServiceCard from "@/components/layout/ServiceCard";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
+// Interface
+export interface ServiceItemData {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+}
+
 export default function LandingPage() {
   const { isAuthenticated } = useAuthStore();
+
+  const defaultServices: ServiceItemData[] = [
+    {
+      icon: <UserGroupIcon className="w-6 h-6" />,
+      title: "Community-Driven Sharing",
+      description:
+        "ShareSphere connects people within trusted communities, making it easy to share everyday items without unnecessary purchases.",
+    },
+    {
+      icon: <CurrencyDollarIcon className="w-6 h-6" />,
+      title: "Save Money, Earn More",
+      description:
+        "Borrow what you need at a fraction of the cost or lend your unused items to earn extra income effortlessly.",
+    },
+    {
+      icon: <ChartBarIcon className="w-6 h-6" />,
+      title: "Smart Lending & Borrowing",
+      description:
+        "Our platform simplifies lending and borrowing with clear terms, tracking, and transparency for both parties.",
+    },
+    {
+      icon: <GlobeAltIcon className="w-6 h-6" />,
+      title: "Access Anywhere, Anytime",
+      description:
+        "Find and share items locally or beyond your neighborhood using a seamless, location-aware platform.",
+    },
+    {
+      icon: <SparklesIcon className="w-6 h-6" />,
+      title: "Sustainable by Design",
+      description:
+        "By encouraging reuse and sharing, ShareSphere helps reduce waste and promotes a more sustainable lifestyle.",
+    },
+    {
+      icon: <UserGroupIcon className="w-6 h-6" />,
+      title: "Trust & Safety First",
+      description:
+        "Built-in user profiles, reviews, and secure interactions ensure safe and reliable sharing experiences.",
+    },
+  ];
+
+  const processSteps: ServiceItemData[] = [
+    {
+      icon: <MagnifyingGlassIcon className="w-6 h-6" />,
+      title: "Browse & Request",
+      description:
+        "Search for items in your area and send a borrow request with your dates.",
+    },
+    {
+      icon: <ChatBubbleLeftRightIcon className="w-6 h-6" />,
+      title: "Connect & Arrange",
+      description:
+        "Chat with the owner, confirm details, and arrange pickup time.",
+    },
+    {
+      icon: <ArrowPathIcon className="w-6 h-6" />,
+      title: "Borrow & Return",
+      description:
+        "Pick up the item, use it, and return it on time. Leave a review!",
+    },
+  ];
+
   const containerRef = useRef(null);
 
   useGSAP(
@@ -114,62 +186,26 @@ export default function LandingPage() {
       </section>
 
       {/* Benefits Section */}
-      <section className="benefits-section py-12 md:py-20 px-4 bg-white">
+      <section className="benefits-section pt-12 pb-2 md:pt-20 md:pb-4 px-4 bg-surface">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
+          <h2 className="text-3xl font-bold text-center text-gray-900 mb-0">
             Why ShareSphere?
           </h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <Card hoverEffect className="text-center h-full">
-              <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <CurrencyDollarIcon className="h-8 w-8 text-primary-600" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Save Money</h3>
-              <p className="text-gray-600">
-                Borrow items instead of buying. Only pay for what you need, when
-                you need it.
-              </p>
-            </Card>
-            <Card hoverEffect className="text-center h-full">
-              <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <CurrencyDollarIcon className="h-8 w-8 text-primary-600" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Earn Income</h3>
-              <p className="text-gray-600">
-                Make money from items you already own. Turn unused items into
-                income.
-              </p>
-            </Card>
-            <Card hoverEffect className="text-center h-full">
-              <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <UserGroupIcon className="h-8 w-8 text-primary-600" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Build Community</h3>
-              <p className="text-gray-600">
-                Connect with neighbors and build meaningful relationships in
-                your area.
-              </p>
-            </Card>
-            <Card hoverEffect className="text-center h-full">
-              <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <SparklesIcon className="h-8 w-8 text-primary-600" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Sustainable Living</h3>
-              <p className="text-gray-600">
-                Reduce waste and environmental impact by sharing resources.
-              </p>
-            </Card>
-          </div>
+        </div>
+      </section>
+      <section className="pb-4 pt-8 px-4">
+        <div className="max-w-7xl mx-auto">
+          <ServiceCard data={defaultServices} />
         </div>
       </section>
 
       {/* How It Works */}
       <section className="steps-section py-12 md:py-20 px-4 bg-surface">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">
+          <h2 className="text-3xl font-bold text-center text-gray-900">
             How It Works
           </h2>
-          <div className="grid md:grid-cols-3 gap-8">
+          {/* <div className="grid md:grid-cols-3 gap-8">
             <Card hoverEffect className="text-center h-full">
               <div className="w-12 h-12 bg-primary-600 text-white rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold">
                 1
@@ -198,7 +234,9 @@ export default function LandingPage() {
                 Pick up the item, use it, and return it on time. Leave a review!
               </p>
             </Card>
-          </div>
+          </div> */}
+          <ServiceCard data={processSteps} className="mt-12" />
+
           <div className="text-center mt-12">
             <Link to="/how-it-works">
               <Button variant="outline">Learn More</Button>
