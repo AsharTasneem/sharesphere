@@ -1,9 +1,11 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/Button";
+import TextDropping from "@/components/layout/DroppingText";
 
 export default function HowItWorksPage() {
   return (
     <div className="min-h-screen py-12 px-4">
+ 
       <div className="max-w-5xl mx-auto">
         <h1 className="text-4xl font-bold text-center mb-12">
           How ShareSphere Works

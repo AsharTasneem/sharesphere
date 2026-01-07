@@ -47,7 +47,7 @@ const ShareSphereGSAP = () => {
   }, []);
 
   return (
-    <section className="min-h-screen flex items-center justify-center bg-primary-50">
+    <section className="min-h-screen flex items-center justify-center bg-surface">
       <div className="flex items-center gap-1 perspective-[800px]">
         {letters.map((letter, index) => (
           <span
