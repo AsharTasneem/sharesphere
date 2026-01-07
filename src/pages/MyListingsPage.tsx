@@ -1,9 +1,10 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "@/stores/authStore";
 import { itemsApi } from "@/services/api";
 import { Card } from "@/components/ui/Card";
-import { Badge } from "@/components/ui/Badge";
+
+import RotatingCard from "@/components/ui/RotatingCards";
 import { Button } from "@/components/ui/Button";
 import { formatCurrency } from "@/lib/utils";
 import { useRef } from "react";
@@ -13,6 +14,7 @@ import { PlusCircleIcon } from "@heroicons/react/24/outline";
 
 export default function MyListingsPage() {
   const { user } = useAuthStore();
+  const navigate = useNavigate();
 
   const { data: allItems = [], isLoading } = useQuery({
     queryKey: ["items"],
@@ -59,13 +61,20 @@ export default function MyListingsPage() {
       </div>
 
       {isLoading ? (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[...Array(6)].map((_, i) => (
-            <Card key={i} className="animate-pulse">
-              <div className="h-48 bg-gray-200 rounded-lg mb-4" />
-              <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
-              <div className="h-4 bg-gray-200 rounded w-1/2" />
-            </Card>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {[...Array(8)].map((_, i) => (
+            <div
+              key={i}
+              className="h-80 rounded-[5px] bg-gray-200 animate-pulse relative overflow-hidden"
+            >
+              <div className="absolute bottom-0 left-0 w-full p-4">
+                <div className="h-6 bg-gray-300 rounded w-3/4 mb-2" />
+                <div className="flex justify-between items-end">
+                  <div className="h-4 bg-gray-300 rounded w-1/2" />
+                  <div className="h-8 bg-gray-300 rounded w-1/4" />
+                </div>
+              </div>
+            </div>
           ))}
         </div>
       ) : myItems.length === 0 ? (
@@ -82,49 +91,59 @@ export default function MyListingsPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {myItems.map((item) => (
-            <Card key={item.id} className="listing-card opacity-0" hoverEffect>
-              <img
-                src={item.primaryImage}
-                alt={item.title}
-                className="w-full h-48 object-cover rounded-lg mb-4"
-              />
-              <div className="flex items-start justify-between mb-2">
-                <h3 className="text-lg font-semibold text-gray-900 line-clamp-1">
-                  {item.title}
-                </h3>
-                <Badge
-                  variant={item.status === "published" ? "success" : "warning"}
-                >
-                  {item.status}
-                </Badge>
-              </div>
-              <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                {item.description}
-              </p>
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <span className="text-xl font-bold text-primary-600">
-                    {formatCurrency(item.pricePerDay)}
-                  </span>
-                  <span className="text-gray-500 text-sm">/day</span>
+            <div key={item.id} className="listing-card opacity-0 h-80">
+              <RotatingCard
+                hoverEffect
+                className="h-full w-full cursor-pointer"
+                onClick={() => navigate(`/listing/${item.id}`)}
+                backContent={
+                  <div className="flex flex-col h-full justify-between p-2 text-center relative">
+                    <div className="mt-2">
+                      <p className="text-gray-300 text-xs line-clamp-3 mb-3">
+                        {item.description}
+                      </p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-center gap-1">
+                        <span className="text-xl font-bold text-white">
+                          {formatCurrency(item.pricePerDay)}
+                        </span>
+                        <span className="text-gray-400 text-xs">/day</span>
+                      </div>
+                      <div className="text-sm text-gray-400">
+                        {item.metadata.views} views
+                      </div>
+                    </div>
+                  </div>
+                }
+              >
+                <div className="w-full h-80 relative">
+                  <img
+                    src={item.primaryImage}
+                    alt={item.title}
+                    className="absolute inset-0 w-full h-full object-cover rounded-[5px]"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent rounded-[5px]" />
+
+                  <div className="absolute bottom-0 left-0 w-full p-4 text-left z-10">
+                    <div className="flex justify-between items-end">
+                      <h3 className="text-white font-bold text-lg line-clamp-2 leading-tight drop-shadow-md mb-2 flex-1 mr-2">
+                        {item.title}
+                      </h3>
+                      <div className="flex flex-col items-end gap-1">
+                        <span className="text-lg font-bold text-white drop-shadow-md">
+                          {formatCurrency(item.pricePerDay)}
+                          <span className="text-xs font-normal opacity-80">
+                            /day
+                          </span>
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div className="text-sm text-gray-500">
-                  {item.metadata.views} views
-                </div>
-              </div>
-              <div className="flex gap-3">
-                <Link to={`/listing/${item.id}`} className="flex-1">
-                  <Button variant="outline" className="w-full">
-                    View
-                  </Button>
-                </Link>
-                <Link to={`/listing/${item.id}/edit`} className="flex-1">
-                  <Button variant="outline" className="w-full">
-                    Edit
-                  </Button>
-                </Link>
-              </div>
-            </Card>
+              </RotatingCard>
+            </div>
           ))}
         </div>
       )}

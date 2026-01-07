@@ -16,7 +16,7 @@ export default {
           800: "#94514F",
           900: "#753F3E",
         },
-        surface: "#f6fbf9",
+        surface: "#FFFFFF",
       },
       fontFamily: {
         sans: ["Inter", "system-ui", "sans-serif"],

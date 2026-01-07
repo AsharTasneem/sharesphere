@@ -1,24 +1,29 @@
-import { useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { itemsApi } from '@/services/api';
-import { useAuthStore } from '@/stores/authStore';
-import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
-import { Card } from '@/components/ui/Card';
-import { formatCurrency, formatDate } from '@/lib/utils';
-import { ITEM_CONDITIONS } from '@/lib/constants';
-import { StarIcon, MapPinIcon, UserIcon, CalendarIcon } from '@heroicons/react/24/solid';
-import { StarIcon as StarOutlineIcon } from '@heroicons/react/24/outline';
+import { useState } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { itemsApi } from "@/services/api";
+import { useAuthStore } from "@/stores/authStore";
+import { Button } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
+import { Card } from "@/components/ui/Card";
+import { formatCurrency, formatDate } from "@/lib/utils";
+import { ITEM_CONDITIONS } from "@/lib/constants";
+import {
+  StarIcon,
+  MapPinIcon,
+  UserIcon,
+  CalendarIcon,
+} from "@heroicons/react/24/solid";
+import { StarIcon as StarOutlineIcon } from "@heroicons/react/24/outline";
 
 export default function ListingDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, user } = useAuthStore();
   const [selectedImage, setSelectedImage] = useState(0);
 
   const { data: item, isLoading } = useQuery({
-    queryKey: ['item', id],
+    queryKey: ["item", id],
     queryFn: () => itemsApi.getById(id!),
     enabled: !!id,
   });
@@ -46,7 +51,9 @@ export default function ListingDetailPage() {
     );
   }
 
-  const conditionLabel = ITEM_CONDITIONS.find(c => c.value === item.condition)?.label || item.condition;
+  const conditionLabel =
+    ITEM_CONDITIONS.find((c) => c.value === item.condition)?.label ||
+    item.condition;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -67,10 +74,16 @@ export default function ListingDetailPage() {
                   key={idx}
                   onClick={() => setSelectedImage(idx)}
                   className={`aspect-square rounded-lg overflow-hidden border-2 ${
-                    selectedImage === idx ? 'border-primary-600' : 'border-transparent'
+                    selectedImage === idx
+                      ? "border-primary-600"
+                      : "border-transparent"
                   }`}
                 >
-                  <img src={img} alt={`${item.title} ${idx + 1}`} className="w-full h-full object-cover" />
+                  <img
+                    src={img}
+                    alt={`${item.title} ${idx + 1}`}
+                    className="w-full h-full object-cover"
+                  />
                 </button>
               ))}
             </div>
@@ -81,7 +94,9 @@ export default function ListingDetailPage() {
         <div>
           <div className="flex items-start justify-between mb-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">{item.title}</h1>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                {item.title}
+              </h1>
               <div className="flex items-center gap-2 text-gray-600">
                 <MapPinIcon className="h-5 w-5" />
                 <span>{item.location.displayAddress}</span>
@@ -92,19 +107,22 @@ export default function ListingDetailPage() {
 
           <div className="flex items-center gap-4 mb-6">
             <div>
-              <span className="text-4xl font-bold text-primary-600">{formatCurrency(item.pricePerDay)}</span>
+              <span className="text-4xl font-bold text-primary-600">
+                {formatCurrency(item.pricePerDay)}
+              </span>
               <span className="text-gray-500">/day</span>
             </div>
             <div className="flex items-center gap-1">
-              {[...Array(5)].map((_, i) => (
+              {[...Array(5)].map((_, i) =>
                 i < Math.floor(item.metadata.rating) ? (
                   <StarIcon key={i} className="h-5 w-5 text-yellow-400" />
                 ) : (
                   <StarOutlineIcon key={i} className="h-5 w-5 text-gray-300" />
                 )
-              ))}
+              )}
               <span className="ml-2 text-gray-600">
-                {item.metadata.rating.toFixed(1)} ({item.metadata.reviewCount} reviews)
+                {item.metadata.rating.toFixed(1)} ({item.metadata.reviewCount}{" "}
+                reviews)
               </span>
             </div>
           </div>
@@ -112,8 +130,12 @@ export default function ListingDetailPage() {
           <Card className="mb-6">
             <div className="space-y-4">
               <div>
-                <h3 className="font-semibold text-gray-900 mb-2">Description</h3>
-                <p className="text-gray-700 whitespace-pre-line">{item.description}</p>
+                <h3 className="font-semibold text-gray-900 mb-2">
+                  Description
+                </h3>
+                <p className="text-gray-700 whitespace-pre-line">
+                  {item.description}
+                </p>
               </div>
               <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200">
                 <div>
@@ -150,16 +172,28 @@ export default function ListingDetailPage() {
           )}
 
           {isAuthenticated ? (
-            <Button
-              className="w-full"
-              size="lg"
-              onClick={() => navigate(`/borrow/request/${item.id}`)}
-            >
-              Request to Borrow
-            </Button>
+            user?.id === item.ownerId ? (
+              <Button
+                className="w-full"
+                size="lg"
+                onClick={() => navigate(`/listing/${item.id}/edit`)}
+              >
+                Edit Listing
+              </Button>
+            ) : (
+              <Button
+                className="w-full"
+                size="lg"
+                onClick={() => navigate(`/borrow/request/${item.id}`)}
+              >
+                Request to Borrow
+              </Button>
+            )
           ) : (
             <Link to="/signin">
-              <Button className="w-full" size="lg">Sign In to Request</Button>
+              <Button className="w-full" size="lg">
+                Sign In to Request
+              </Button>
             </Link>
           )}
         </div>
@@ -170,18 +204,24 @@ export default function ListingDetailPage() {
         <Card className="mb-8">
           <div className="flex items-center gap-4">
             <img
-              src={item.owner.avatar || 'https://i.pravatar.cc/150?img=1'}
+              src={item.owner.avatar || "https://i.pravatar.cc/150?img=1"}
               alt={item.owner.name}
               className="w-16 h-16 rounded-full"
             />
             <div className="flex-1">
               <h3 className="font-semibold text-gray-900">{item.owner.name}</h3>
-              <p className="text-sm text-gray-600">Member since {formatDate(item.owner.stats.memberSince)}</p>
+              <p className="text-sm text-gray-600">
+                Member since {formatDate(item.owner.stats.memberSince)}
+              </p>
               <div className="flex items-center gap-4 mt-2">
                 <div className="flex items-center gap-1">
                   <StarIcon className="h-4 w-4 text-yellow-400" />
-                  <span className="text-sm">{item.owner.stats.rating.toFixed(1)}</span>
-                  <span className="text-sm text-gray-500">({item.owner.stats.reviewCount})</span>
+                  <span className="text-sm">
+                    {item.owner.stats.rating.toFixed(1)}
+                  </span>
+                  <span className="text-sm text-gray-500">
+                    ({item.owner.stats.reviewCount})
+                  </span>
                 </div>
                 <span className="text-sm text-gray-500">
                   {item.owner.stats.totalLent} items lent
@@ -197,12 +237,11 @@ export default function ListingDetailPage() {
 
       {/* Pickup Instructions */}
       <Card className="mb-8">
-        <h3 className="font-semibold text-gray-900 mb-2">Pickup Instructions</h3>
+        <h3 className="font-semibold text-gray-900 mb-2">
+          Pickup Instructions
+        </h3>
         <p className="text-gray-700">{item.pickupInstructions}</p>
       </Card>
     </div>
   );
 }
-
-
-
