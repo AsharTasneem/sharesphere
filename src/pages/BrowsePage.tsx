@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Link, useSearchParams } from "react-router-dom";
 import { itemsApi } from "@/services/api";
 import { Card } from "@/components/ui/Card";
+import RotatingCard from "@/components/ui/RotatingCards";
 import { Input } from "@/components/ui/Input";
 import { CustomSelect } from "@/components/ui/CustomSelect";
 import { Badge } from "@/components/ui/Badge";
@@ -160,58 +161,81 @@ export default function BrowsePage() {
               to={`/listing/${item.id}`}
               className="item-card-container block h-full transition-transform opacity-0"
             >
-              <Card
+              <RotatingCard
                 hoverEffect
-                className="h-full flex flex-col overflow-hidden"
+                className="h-full w-full"
+                backContent={
+                  <div className="flex flex-col h-full justify-between p-2 text-center">
+                    <div className="mt-2">
+                      <Badge
+                        variant="default"
+                        className="mb-2 bg-primary-100 text-primary-700 hover:bg-primary-200 border-none"
+                      >
+                        {item.category}
+                      </Badge>
+                      <p className="text-gray-300 text-xs line-clamp-3 mb-3">
+                        {item.description}
+                      </p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-center gap-1">
+                        <span className="text-xl font-bold text-white">
+                          {formatCurrency(item.pricePerDay)}
+                        </span>
+                        <span className="text-gray-400 text-xs">/day</span>
+                      </div>
+
+                      <div className="flex items-center justify-center gap-2">
+                        {item.metadata.rating > 0 && (
+                          <div className="text-xs text-gray-300 flex items-center gap-1">
+                            <span className="text-yellow-400">★</span>
+                            <span>{item.metadata.rating.toFixed(1)}</span>
+                            <span className="text-gray-500">
+                              ({item.metadata.reviewCount})
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-[10px] text-gray-500 truncate">
+                        {item.location.displayAddress}
+                      </p>
+                    </div>
+                  </div>
+                }
               >
-                <div className="w-full h-48 mb-4 overflow-hidden rounded-lg bg-gray-100">
+                <div className="w-full h-80 relative">
                   <img
                     src={item.primaryImage}
                     alt={item.title}
-                    className="w-full h-full object-cover"
-                    loading="lazy"
+                    className="absolute inset-0 w-full h-full object-cover rounded-[5px]"
                   />
-                </div>
-                <div className="flex-1 flex flex-col min-h-0">
-                  <div className="flex items-start justify-between mb-2 gap-2">
-                    <h3 className="text-lg font-semibold text-gray-900 flex-1 line-clamp-2 leading-tight">
-                      {item.title}
-                    </h3>
-                    <Badge
-                      variant="default"
-                      size="sm"
-                      className="flex-shrink-0"
-                    >
-                      {item.category}
-                    </Badge>
-                  </div>
-                  <p className="text-gray-600 text-sm mb-3 line-clamp-2 flex-shrink-0">
-                    {item.description}
-                  </p>
-                  <div className="mt-auto pt-2">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-2xl font-bold text-primary-600">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent rounded-[5px]" />
+
+                  <div className="absolute bottom-0 left-0 w-full p-4 text-left z-10">
+                    <div className="flex justify-between items-end">
+                      <h3 className="text-white font-bold text-lg line-clamp-2 leading-tight drop-shadow-md mb-2 flex-1 mr-2">
+                        {item.title}
+                      </h3>
+                      <div className="flex flex-col items-end gap-1">
+                        <Badge
+                          variant="default"
+                          size="sm"
+                          className="bg-white/20 text-white backdrop-blur-md border-none"
+                        >
+                          {item.category}
+                        </Badge>
+                        <span className="text-lg font-bold text-white drop-shadow-md">
                           {formatCurrency(item.pricePerDay)}
-                        </span>
-                        <span className="text-gray-500 text-sm">/day</span>
-                      </div>
-                      {item.metadata.rating > 0 && (
-                        <div className="text-sm text-gray-500 flex items-center gap-1">
-                          <span className="text-yellow-500">★</span>
-                          <span>{item.metadata.rating.toFixed(1)}</span>
-                          <span className="text-gray-400">
-                            ({item.metadata.reviewCount})
+                          <span className="text-xs font-normal opacity-80">
+                            /day
                           </span>
-                        </div>
-                      )}
+                        </span>
+                      </div>
                     </div>
-                    <p className="text-sm text-gray-500 truncate">
-                      {item.location.displayAddress}
-                    </p>
                   </div>
                 </div>
-              </Card>
+              </RotatingCard>
             </Link>
           ))}
         </div>
@@ -242,7 +266,7 @@ export default function BrowsePage() {
                       {item.category}
                     </Badge>
                   </div>
-                  <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+                  <p className="text-gray-600 text-lg mb-3 line-clamp-2">
                     {item.description}
                   </p>
                   <div className="flex items-center justify-between">
