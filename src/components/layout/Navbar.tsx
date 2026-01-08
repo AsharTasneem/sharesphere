@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   MagnifyingGlassIcon,
   BellIcon,
@@ -10,6 +10,8 @@ import { useAuthStore } from "@/stores/authStore";
 import { useNotificationStore } from "@/stores/notificationStore";
 import { useUIStore } from "@/stores/uiStore";
 import { Button } from "@/components/ui/Button";
+import { gsap } from "gsap";
+import { useGSAP } from "@gsap/react";
 
 interface NavbarProps {
   showSidebarToggle?: boolean;
@@ -21,6 +23,60 @@ export function Navbar({ showSidebarToggle = false }: NavbarProps) {
   const { unreadCount, fetchNotifications } = useNotificationStore();
   const { showToast, toggleSidebar } = useUIStore();
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+  const navRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      const scrollDifference = Math.abs(currentScrollY - lastScrollY);
+
+      // Show navbar when at the top of the page
+      if (currentScrollY < 100) {
+        setIsVisible(true);
+      }
+      // Only trigger hide/show after scrolling at least 100px
+      else if (scrollDifference > 50) {
+        if (currentScrollY > lastScrollY) {
+          // Scrolling down - hide navbar
+          setIsVisible(false);
+        } else {
+          // Scrolling up - show navbar
+          setIsVisible(true);
+        }
+        setLastScrollY(currentScrollY);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [lastScrollY]);
+
+  useGSAP(
+    () => {
+      if (!navRef.current) return;
+
+      if (isVisible) {
+        // Show navbar with smooth animation
+        gsap.to(navRef.current, {
+          y: 0,
+          opacity: 1,
+          duration: 0.6,
+          ease: "power4.out",
+        });
+      } else {
+        // Hide navbar with smooth animation
+        gsap.to(navRef.current, {
+          y: -100,
+          opacity: 0.8,
+          duration: 0.6,
+          ease: "power4.in",
+        });
+      }
+    },
+    { dependencies: [isVisible] }
+  );
 
   const handleSignOut = () => {
     signOut();
@@ -36,15 +92,18 @@ export function Navbar({ showSidebarToggle = false }: NavbarProps) {
   };
 
   return (
-    <nav className="bg-white border-b border-gray-200 sticky top-0 z-40">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <nav
+      ref={navRef}
+      className="bg-white border-b border-gray-200 sticky top-0 z-40"
+    >
+      <div className="max-w-full px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-shrink-0 min-w-fit">
             <Link to="/" className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center flex-shrink-0">
                 <span className="text-white font-bold text-lg">S</span>
               </div>
-              <span className="text-xl font-semibold text-gray-900 hidden sm:block">
+              <span className="text-xl font-semibold text-gray-900 hidden sm:block whitespace-nowrap">
                 ShareSphere
               </span>
             </Link>
@@ -67,7 +126,7 @@ export function Navbar({ showSidebarToggle = false }: NavbarProps) {
 
               {/* Mobile Search Toggle */}
               <button
-                className="md:hidden p-2 rounded-full hover:bg-gray-100 transition-colors"
+                className="md:hidden p-2 rounded-full hover:bg-primary-100 hover:text-primary-600 transition-colors"
                 onClick={() => setIsMobileSearchOpen(!isMobileSearchOpen)}
               >
                 <MagnifyingGlassIcon className="h-6 w-6 text-gray-600" />
@@ -75,10 +134,10 @@ export function Navbar({ showSidebarToggle = false }: NavbarProps) {
 
               <Link
                 to="/dashboard/messages"
-                className="relative p-2 rounded-full hover:bg-gray-100 transition-colors"
+                className="relative p-2 rounded-full hover:bg-primary-100 transition-colors group"
                 aria-label="Messages"
               >
-                <ChatBubbleLeftRightIcon className="h-6 w-6 text-gray-600" />
+                <ChatBubbleLeftRightIcon className="h-6 w-6 text-gray-600 group-hover:text-gray-600 transition-colors" />
               </Link>
 
               <button
@@ -86,10 +145,10 @@ export function Navbar({ showSidebarToggle = false }: NavbarProps) {
                   fetchNotifications();
                   navigate("/dashboard/notifications");
                 }}
-                className="relative p-2 rounded-full hover:bg-gray-100 transition-colors"
+                className="relative p-2 rounded-full hover:bg-primary-100 transition-colors group"
                 aria-label="Notifications"
               >
-                <BellIcon className="h-6 w-6 text-gray-600" />
+                <BellIcon className="h-6 w-6 text-gray-600 group-hover:text-gray-600 transition-colors" />
                 {unreadCount > 0 && (
                   <span className="absolute top-1 right-1 h-4 w-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
                     {unreadCount > 9 ? "9+" : unreadCount}

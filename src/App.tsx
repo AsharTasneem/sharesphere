@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Outlet } from "react-router-dom";
 import { useAuthStore } from "@/stores/authStore";
 import { Layout } from "@/components/layout/Layout";
 import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
@@ -23,6 +23,24 @@ import AccountSettingsPage from "@/pages/AccountSettingsPage";
 import RequestDetailPage from "@/pages/RequestDetailPage";
 import RouteChangeLoader from "@/components/layout/RouteChangeLoader";
 
+// Layout wrapper components
+function PublicLayout() {
+  return (
+    <Layout showSidebar={false}>
+      <Outlet />
+    </Layout>
+  );
+}
+
+// Single unified layout for all pages with sidebar (both public and protected)
+function SidebarLayout() {
+  return (
+    <Layout>
+      <Outlet />
+    </Layout>
+  );
+}
+
 function App() {
   const { initialize } = useAuthStore();
 
@@ -33,177 +51,118 @@ function App() {
   return (
     <RouteChangeLoader>
       <Routes>
-        {/* Public routes */}
-        <Route
-          path="/"
-          element={
-            <Layout showSidebar={false}>
-              <LandingPage />
-            </Layout>
-          }
-        />
-        <Route
-          path="/how-it-works"
-          element={
-            <Layout showSidebar={false}>
-              <HowItWorksPage />
-            </Layout>
-          }
-        />
-        <Route
-          path="/signin"
-          element={
-            <Layout showSidebar={false}>
-              <SignInPage />
-            </Layout>
-          }
-        />
-        <Route
-          path="/signup"
-          element={
-            <Layout showSidebar={false}>
-              <SignUpPage />
-            </Layout>
-          }
-        />
-        <Route
-          path="/browse"
-          element={
-            <Layout>
-              <BrowsePage />
-            </Layout>
-          }
-        />
-        <Route
-          path="/listing/:id"
-          element={
-            <Layout>
-              <ListingDetailPage />
-            </Layout>
-          }
-        />
+        {/* Public routes without sidebar */}
+        <Route element={<PublicLayout />}>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/how-it-works" element={<HowItWorksPage />} />
+          <Route path="/signin" element={<SignInPage />} />
+          <Route path="/signup" element={<SignUpPage />} />
+        </Route>
 
-        {/* Protected routes */}
-        <Route
-          path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Layout>
+        {/* All routes with sidebar - unified layout */}
+        <Route element={<SidebarLayout />}>
+          {/* Public routes with sidebar */}
+          <Route path="/browse" element={<BrowsePage />} />
+          <Route path="/listing/:id" element={<ListingDetailPage />} />
+
+          {/* Protected routes with sidebar */}
+          <Route
+            path="/dashboard"
+            element={
+              <ProtectedRoute>
                 <DashboardPage />
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard/messages"
-          element={
-            <ProtectedRoute>
-              <Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard/messages"
+            element={
+              <ProtectedRoute>
                 <MessagesPage />
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard/messages/:requestId"
-          element={
-            <ProtectedRoute>
-              <Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard/messages/:requestId"
+            element={
+              <ProtectedRoute>
                 <MessagesPage />
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard/notifications"
-          element={
-            <ProtectedRoute>
-              <Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard/notifications"
+            element={
+              <ProtectedRoute>
                 <NotificationsPage />
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard/profile"
-          element={
-            <ProtectedRoute>
-              <Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard/profile"
+            element={
+              <ProtectedRoute>
                 <ProfilePage />
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard/settings"
-          element={
-            <ProtectedRoute>
-              <Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard/settings"
+            element={
+              <ProtectedRoute>
                 <AccountSettingsPage />
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/listing/new"
-          element={
-            <ProtectedRoute>
-              <Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/listing/new"
+            element={
+              <ProtectedRoute>
                 <CreateListingPage />
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard/my-listings"
-          element={
-            <ProtectedRoute>
-              <Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard/my-listings"
+            element={
+              <ProtectedRoute>
                 <MyListingsPage />
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard/borrowed"
-          element={
-            <ProtectedRoute>
-              <Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard/borrowed"
+            element={
+              <ProtectedRoute>
                 <BorrowedPage />
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard/borrowed/:id"
-          element={
-            <ProtectedRoute>
-              <Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard/borrowed/:id"
+            element={
+              <ProtectedRoute>
                 <RequestDetailPage />
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard/lending-history"
-          element={
-            <ProtectedRoute>
-              <Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/dashboard/lending-history"
+            element={
+              <ProtectedRoute>
                 <LendingHistoryPage />
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/borrow/request/:itemId"
-          element={
-            <ProtectedRoute>
-              <Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/borrow/request/:itemId"
+            element={
+              <ProtectedRoute>
                 <RequestDetailPage />
-              </Layout>
-            </ProtectedRoute>
-          }
-        />
+              </ProtectedRoute>
+            }
+          />
+        </Route>
       </Routes>
     </RouteChangeLoader>
   );

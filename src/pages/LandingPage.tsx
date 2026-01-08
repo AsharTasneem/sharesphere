@@ -236,12 +236,6 @@ export default function LandingPage() {
             </Card>
           </div> */}
           <ServiceCard data={processSteps} className="mt-12" />
-
-          <div className="text-center mt-12">
-            <Link to="/how-it-works">
-              <Button variant="outline">Learn More</Button>
-            </Link>
-          </div>
         </div>
       </section>
 

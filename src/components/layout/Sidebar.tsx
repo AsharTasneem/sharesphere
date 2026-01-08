@@ -43,70 +43,74 @@ export function Sidebar() {
     return () => window.removeEventListener("resize", handleResize);
   }, [sidebarOpen, setSidebarOpen]);
 
-  useGSAP(
-    () => {
+  // Initial setup - runs only once on mount
+  useEffect(() => {
+    if (sidebarRef.current && overlayRef.current) {
       const mm = gsap.matchMedia();
 
+      // Set initial states based on screen size
       mm.add("(max-width: 1023px)", () => {
-        // Mobile Interactions
-        if (sidebarOpen) {
-          // Open
-          gsap.to(overlayRef.current, {
-            autoAlpha: 1,
-            duration: 0.3,
-            ease: "power2.out",
-          });
-          gsap.to(sidebarRef.current, {
-            x: 0,
-            duration: 0.5,
-            ease: "power3.out",
-          });
-          gsap.fromTo(
-            ".nav-item",
-            { x: 30, opacity: 0 },
-            {
-              x: 0,
-              opacity: 1,
-              duration: 0.4,
-              stagger: 0.05,
-              delay: 0.1,
-              ease: "power2.out",
-            }
-          );
-        } else {
-          // Close
-          gsap.to(overlayRef.current, {
-            autoAlpha: 0,
-            duration: 0.3,
-            ease: "power2.in",
-          });
-          gsap.to(sidebarRef.current, {
-            x: "100%",
-            duration: 0.4,
-            ease: "power3.in",
-          });
-        }
+        gsap.set(sidebarRef.current, { x: "100%" });
+        gsap.set(overlayRef.current, { autoAlpha: 0 });
       });
 
       mm.add("(min-width: 1024px)", () => {
-        // Desktop Reset
         gsap.set(sidebarRef.current, { x: 0 });
         gsap.set(overlayRef.current, { autoAlpha: 0 });
-        gsap.set(".nav-item", { x: 0, opacity: 1 });
       });
+
+      return () => mm.revert();
+    }
+  }, []);
+
+  // Mobile sidebar open/close animations - only runs when sidebarOpen changes
+  useGSAP(
+    () => {
+      // Only animate on mobile
+      if (window.innerWidth >= 1024) return;
+
+      if (sidebarOpen) {
+        // Open animations
+        gsap.to(overlayRef.current, {
+          autoAlpha: 1,
+          duration: 0.3,
+          ease: "power2.out",
+        });
+        gsap.to(sidebarRef.current, {
+          x: 0,
+          duration: 0.5,
+          ease: "power3.out",
+        });
+
+        // Stagger navigation items
+        gsap.fromTo(
+          ".nav-item",
+          { x: 12, autoAlpha: 0 },
+          {
+            x: 0,
+            autoAlpha: 1,
+            duration: 0.4,
+            stagger: 0.07,
+            ease: "power4.out",
+            delay: 0.2, // Wait for sidebar to start opening
+          }
+        );
+      } else {
+        // Close animations
+        gsap.to(overlayRef.current, {
+          autoAlpha: 0,
+          duration: 0.3,
+          ease: "power2.in",
+        });
+        gsap.to(sidebarRef.current, {
+          x: "100%",
+          duration: 0.4,
+          ease: "power3.in",
+        });
+      }
     },
     { scope: sidebarRef, dependencies: [sidebarOpen] }
   );
-
-  // Set initial closed state on mount for mobile
-  useEffect(() => {
-    if (sidebarRef.current && overlayRef.current) {
-      if (window.innerWidth < 1024) {
-        gsap.set(sidebarRef.current, { x: "100%" });
-        gsap.set(overlayRef.current, { autoAlpha: 0 });
-      }
-    }
-  }, []);
 
   // Note: overlayRef is outside sidebarRef scope usually, so we might need to scope strictly or just use global selectors if safely unique?
   // Actually refs are safer. `scope` in useGSAP defaults to clean up GSAP instances.
@@ -156,7 +160,7 @@ export function Sidebar() {
       <div
         ref={overlayRef}
         className={cn(
-          "fixed inset-0 bg-black/50 z-40 lg:hidden opacity-0",
+          "fixed inset-0 z-[70] lg:hidden opacity-0",
           sidebarOpen ? "pointer-events-auto" : "pointer-events-none"
         )}
         onClick={() => setSidebarOpen(false)}
@@ -166,10 +170,10 @@ export function Sidebar() {
       <aside
         ref={sidebarRef}
         className={cn(
-          "fixed bottom-0 w-64 bg-white z-50 shadow-xl lg:shadow-none",
-          "top-0 right-0 border-l border-gray-200", // Mobile
-          "lg:top-16 lg:left-0 lg:right-auto lg:border-l-0 lg:border-r", // Desktop
-          "translate-x-full lg:translate-x-0" // Default CSS State (Mobile Hidden, Desktop Visible)
+          "fixed w-64 bg-white z-[80] shadow-xl",
+          "top-0 right-0 bottom-0 border-l border-gray-200", // Mobile
+          "lg:static lg:border-l-0 lg:border-r lg:shadow-none lg:h-auto", // Desktop
+          "translate-x-full lg:translate-x-0 " // Default CSS State (Mobile Hidden, Desktop Visible)
         )}
       >
         <div className="h-full flex flex-col" ref={navContainerRef}>
@@ -178,7 +182,7 @@ export function Sidebar() {
             <span className="font-semibold text-gray-900">Menu</span>
             <button
               onClick={() => setSidebarOpen(false)}
-              className="p-2 -mr-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors"
+              className="p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors"
               aria-label="Close menu"
             >
               <XMarkIcon className="h-6 w-6" />

@@ -66,7 +66,34 @@ export default function BrowsePage() {
       className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
     >
       <div className="mb-8 page-header opacity-0">
-        <h1 className="text-3xl font-bold text-gray-900 mb-4">Browse Items</h1>
+        <div className="flex items-center justify-between mb-4">
+          <h1 className="text-3xl font-bold text-gray-900">Browse Items</h1>
+          {/* View mode buttons - visible on small screens only */}
+          <div className="flex gap-2 items-center md:hidden">
+            <button
+              onClick={() => setViewMode("grid")}
+              className={`p-2 rounded-lg transition-colors ${
+                viewMode === "grid"
+                  ? "bg-primary-100 text-primary-600"
+                  : "text-gray-600 hover:bg-gray-100"
+              }`}
+              aria-label="Grid view"
+            >
+              <Squares2X2Icon className="h-5 w-5" />
+            </button>
+            <button
+              onClick={() => setViewMode("list")}
+              className={`p-2 rounded-lg transition-colors ${
+                viewMode === "list"
+                  ? "bg-primary-100 text-primary-600"
+                  : "text-gray-600 hover:bg-gray-100"
+              }`}
+              aria-label="List view"
+            >
+              <ListBulletIcon className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
 
         <div className="flex flex-col md:flex-row gap-4 mb-6">
           <div className="flex-1">
@@ -111,7 +138,8 @@ export default function BrowsePage() {
               }}
             />
           </div>
-          <div className="flex gap-2 items-center">
+          {/* View mode buttons - visible on medium screens and above */}
+          <div className="hidden md:flex gap-2 items-center">
             <button
               onClick={() => setViewMode("grid")}
               className={`p-2 rounded-lg transition-colors ${
