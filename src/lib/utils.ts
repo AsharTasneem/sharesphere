@@ -2,10 +2,6 @@ import { type ClassValue, clsx } from "clsx";
 import { Item, PricingBreakdown } from "./types";
 import { twMerge } from "tailwind-merge";
 
-// export function cn(...inputs: ClassValue[]) {
-//   return clsx(inputs);
-// }
-
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
