@@ -21,6 +21,107 @@ import { cn } from "@/lib/utils";
 
 gsap.registerPlugin(useGSAP);
 
+// Extracted SidebarItem for scoped animation
+const SidebarItem = ({
+  item,
+  isActive,
+  onClick,
+}: {
+  item: { path?: string; label: string; icon: any };
+  isActive?: boolean;
+  onClick: () => void;
+}) => {
+  const itemRef = useRef<HTMLAnchorElement | HTMLButtonElement>(null);
+
+  useGSAP(
+    () => {
+      if (!itemRef.current) return;
+
+      const beam = itemRef.current.querySelector(".beam");
+
+      if (isActive) {
+        // Active state: Beam fills from left to right
+        gsap.to(beam, {
+          scaleX: 1,
+          opacity: 1,
+          duration: 0.6,
+          ease: "power3.inOut",
+        });
+
+        // Subtle pop for the container
+        gsap.fromTo(
+          itemRef.current,
+          { scale: 0.98 },
+          {
+            scale: 1,
+            duration: 0.4,
+            ease: "power3.inOut",
+            clearProps: "scale",
+          }
+        );
+      } else {
+        // Inactive state: Beam recedes
+        gsap.to(beam, {
+          scaleX: 0,
+          opacity: 0,
+          duration: 0.3,
+          ease: "power2.in",
+        });
+      }
+    },
+    { dependencies: [isActive], scope: itemRef }
+  );
+
+  const Icon = item.icon;
+  const className = cn(
+    "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors nav-item relative overflow-hidden group",
+    isActive
+      ? "text-primary-900 font-semibold"
+      : "text-gray-700 hover:bg-gray-50"
+  );
+
+  const content = (
+    <>
+      <div className="beam absolute inset-0 bg-primary-200 z-0 origin-left scale-x-0 opacity-0" />
+      <Icon
+        className={cn(
+          "h-5 w-5 relative z-10 transition-colors",
+          isActive ? "text-primary-700" : "group-hover:text-gray-900"
+        )}
+      />
+      <span className="relative z-10">{item.label}</span>
+      {isActive && (
+        <span className="absolute left-0 top-0 bottom-0 w-1 bg-primary-600 rounded-r-full z-20" />
+      )}
+    </>
+  );
+
+  // Render as Button if no path (e.g. Sign Out)
+  if (!item.path) {
+    return (
+      <button
+        ref={itemRef as any}
+        onClick={onClick}
+        className={cn(className, "w-full text-left")}
+      >
+        {content}
+      </button>
+    );
+  }
+
+  // Render as Link
+  return (
+    <Link
+      ref={itemRef as any}
+      to={item.path}
+      onClick={onClick}
+      className={className}
+    >
+      {content}
+    </Link>
+  );
+};
+
 export function Sidebar() {
   const location = useLocation();
   const { signOut } = useAuthStore();
@@ -112,9 +213,6 @@ export function Sidebar() {
     { scope: sidebarRef, dependencies: [sidebarOpen] }
   );
 
-  // Note: overlayRef is outside sidebarRef scope usually, so we might need to scope strictly or just use global selectors if safely unique?
-  // Actually refs are safer. `scope` in useGSAP defaults to clean up GSAP instances.
-
   const navItems = [
     { path: "/dashboard", label: "Dashboard", icon: HomeIcon, exact: true },
     { path: "/browse", label: "Browse", icon: MagnifyingGlassIcon },
@@ -195,25 +293,14 @@ export function Sidebar() {
                 Main
               </h3>
               <div className="space-y-1">
-                {navItems.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <Link
-                      key={item.path}
-                      to={item.path}
-                      onClick={() => setSidebarOpen(false)}
-                      className={cn(
-                        "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors nav-item",
-                        isActive(item.path, item.exact)
-                          ? "bg-primary-50 text-primary-700"
-                          : "text-gray-700 hover:bg-gray-50"
-                      )}
-                    >
-                      <Icon className="h-5 w-5" />
-                      {item.label}
-                    </Link>
-                  );
-                })}
+                {navItems.map((item) => (
+                  <SidebarItem
+                    key={item.path}
+                    item={item}
+                    isActive={isActive(item.path, item.exact)}
+                    onClick={() => setSidebarOpen(false)}
+                  />
+                ))}
               </div>
             </div>
 
@@ -222,25 +309,14 @@ export function Sidebar() {
                 Manage
               </h3>
               <div className="space-y-1">
-                {manageItems.map((item) => {
-                  const Icon = item.icon;
-                  return (
-                    <Link
-                      key={item.path}
-                      to={item.path}
-                      onClick={() => setSidebarOpen(false)}
-                      className={cn(
-                        "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors nav-item",
-                        isActive(item.path)
-                          ? "bg-primary-50 text-primary-700"
-                          : "text-gray-700 hover:bg-gray-50"
-                      )}
-                    >
-                      <Icon className="h-5 w-5" />
-                      {item.label}
-                    </Link>
-                  );
-                })}
+                {manageItems.map((item) => (
+                  <SidebarItem
+                    key={item.path}
+                    item={item}
+                    isActive={isActive(item.path)}
+                    onClick={() => setSidebarOpen(false)}
+                  />
+                ))}
               </div>
             </div>
 
@@ -249,42 +325,36 @@ export function Sidebar() {
                 Settings
               </h3>
               <div className="space-y-1">
-                <Link
-                  to="/dashboard/profile"
+                <SidebarItem
+                  item={{
+                    path: "/dashboard/profile",
+                    label: "Profile",
+                    icon: Cog6ToothIcon,
+                  }}
+                  isActive={isActive("/dashboard/profile")}
                   onClick={() => setSidebarOpen(false)}
-                  className={cn(
-                    "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors nav-item",
-                    isActive("/dashboard/profile")
-                      ? "bg-primary-50 text-primary-700"
-                      : "text-gray-700 hover:bg-gray-50"
-                  )}
-                >
-                  <Cog6ToothIcon className="h-5 w-5" />
-                  Profile
-                </Link>
-                <Link
-                  to="/dashboard/settings"
+                />
+                <SidebarItem
+                  item={{
+                    path: "/dashboard/settings",
+                    label: "Account Settings",
+                    icon: Cog6ToothIcon,
+                  }}
+                  isActive={isActive("/dashboard/settings")}
                   onClick={() => setSidebarOpen(false)}
-                  className={cn(
-                    "flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors nav-item",
-                    isActive("/dashboard/settings")
-                      ? "bg-primary-50 text-primary-700"
-                      : "text-gray-700 hover:bg-gray-50"
-                  )}
-                >
-                  <Cog6ToothIcon className="h-5 w-5" />
-                  Account Settings
-                </Link>
-                <button
+                />
+
+                <SidebarItem
+                  item={{
+                    label: "Sign Out",
+                    icon: ArrowRightOnRectangleIcon,
+                  }}
+                  isActive={false}
                   onClick={() => {
                     signOut();
                     setSidebarOpen(false);
                   }}
-                  className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 w-full text-left transition-colors nav-item"
-                >
-                  <ArrowRightOnRectangleIcon className="h-5 w-5" />
-                  Sign Out
-                </button>
+                />
               </div>
             </div>
           </nav>

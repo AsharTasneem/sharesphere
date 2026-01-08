@@ -54,7 +54,7 @@ const StyledWrapper = styled.div<{ $hoverEffect: boolean }>`
     width: 100%;
     height: 100%;
     transform-style: preserve-3d;
-    transition: transform 600ms cubic-bezier(0.23, 1, 0.32, 1);
+    transition: transform 1000ms cubic-bezier(0.23, 1, 0.32, 1);
   }
 
   .face {

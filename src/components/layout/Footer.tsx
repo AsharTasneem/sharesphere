@@ -6,6 +6,8 @@ import {
 } from "@heroicons/react/24/outline";
 import { AnimatedTooltip } from "@/components/layout/AnimatedTooltip";
 import Ashar from "@/public/images/ashar.png";
+import Hamza from "@/public/images/hamza.jpeg";
+import Nabeel from "@/public/images/nabeel.jpeg";
 
 interface FooterProps {
   className?: string;
@@ -22,24 +24,22 @@ const Footer = ({ className = "" }: FooterProps) => {
     },
     {
       id: 2,
-      name: "M. Nabeel Hussain",
-      designation: "Backend Developer",
-      image:
-        "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8YXZhdGFyfGVufDB8fDB8fHww&auto=format&fit=crop&w=800&q=60",
+      name: "Muhammad Hamza",
+      designation: "UI/UX Designer",
+      image: Hamza,
     },
     {
       id: 3,
-      name: "Muhammad Hamza",
-      designation: "UI/UX Designer",
-      image:
-        "https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8YXZhdGFyfGVufDB8fDB8fHww&auto=format&fit=crop&w=800&q=60",
-    },
-    {
-      id: 4,
       name: "Shazaib Imran",
       designation: "SQA Engineer",
       image:
         "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fGF2YXRhcnxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=800&q=60",
+    },
+    {
+      id: 4,
+      name: "M. Nabeel Hussain",
+      designation: "Backend Developer",
+      image: Nabeel,
     },
   ];
 
@@ -243,6 +243,9 @@ const Footer = ({ className = "" }: FooterProps) => {
                   hello@sharesphere.com
                 </a>
               </li>
+              {/* <li className="flex flex-row items-center justify-center max-w-fit  px-10 ">
+                <AnimatedTooltip items={people} />
+              </li> */}
             </ul>
           </div>
         </div>
