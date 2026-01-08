@@ -5,6 +5,7 @@ import {
   MapPinIcon,
 } from "@heroicons/react/24/outline";
 import { AnimatedTooltip } from "@/components/layout/AnimatedTooltip";
+import Ashar from "@/public/images/ashar.png";
 
 interface FooterProps {
   className?: string;
@@ -17,8 +18,7 @@ const Footer = ({ className = "" }: FooterProps) => {
       id: 1,
       name: "Ashar Tasneem",
       designation: "Frontend Developer",
-      image:
-        "https://images.unsplash.com/photo-1599566150163-29194dcaad36?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=3387&q=80",
+      image: Ashar,
     },
     {
       id: 2,

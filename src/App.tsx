@@ -3,6 +3,7 @@ import { Routes, Route, Outlet } from "react-router-dom";
 import { useAuthStore } from "@/stores/authStore";
 import { Layout } from "@/components/layout/Layout";
 import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
+import LenisProvider from "@/providers/LenisProvider";
 
 // Pages
 import LandingPage from "@/pages/LandingPage";
@@ -49,122 +50,133 @@ function App() {
   }, [initialize]);
 
   return (
-    <RouteChangeLoader>
-      <Routes>
-        {/* Public routes without sidebar */}
-        <Route element={<PublicLayout />}>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/how-it-works" element={<HowItWorksPage />} />
-          <Route path="/signin" element={<SignInPage />} />
-          <Route path="/signup" element={<SignUpPage />} />
-        </Route>
+    <LenisProvider>
+      <RouteChangeLoader>
+        <Routes>
+          {/* Public routes without sidebar */}
+          <Route element={<PublicLayout />}>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/how-it-works" element={<HowItWorksPage />} />
+            <Route path="/signin" element={<SignInPage />} />
+            <Route path="/signup" element={<SignUpPage />} />
+          </Route>
 
-        {/* All routes with sidebar - unified layout */}
-        <Route element={<SidebarLayout />}>
-          {/* Public routes with sidebar */}
-          <Route path="/browse" element={<BrowsePage />} />
-          <Route path="/listing/:id" element={<ListingDetailPage />} />
+          {/* All routes with sidebar */}
+          <Route element={<SidebarLayout />}>
+            <Route path="/browse" element={<BrowsePage />} />
+            <Route path="/listing/:id" element={<ListingDetailPage />} />
 
-          {/* Protected routes with sidebar */}
-          <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <DashboardPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard/messages"
-            element={
-              <ProtectedRoute>
-                <MessagesPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard/messages/:requestId"
-            element={
-              <ProtectedRoute>
-                <MessagesPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard/notifications"
-            element={
-              <ProtectedRoute>
-                <NotificationsPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard/profile"
-            element={
-              <ProtectedRoute>
-                <ProfilePage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard/settings"
-            element={
-              <ProtectedRoute>
-                <AccountSettingsPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/listing/new"
-            element={
-              <ProtectedRoute>
-                <CreateListingPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard/my-listings"
-            element={
-              <ProtectedRoute>
-                <MyListingsPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard/borrowed"
-            element={
-              <ProtectedRoute>
-                <BorrowedPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard/borrowed/:id"
-            element={
-              <ProtectedRoute>
-                <RequestDetailPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/dashboard/lending-history"
-            element={
-              <ProtectedRoute>
-                <LendingHistoryPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/borrow/request/:itemId"
-            element={
-              <ProtectedRoute>
-                <RequestDetailPage />
-              </ProtectedRoute>
-            }
-          />
-        </Route>
-      </Routes>
-    </RouteChangeLoader>
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <DashboardPage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/dashboard/messages"
+              element={
+                <ProtectedRoute>
+                  <MessagesPage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/dashboard/messages/:requestId"
+              element={
+                <ProtectedRoute>
+                  <MessagesPage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/dashboard/notifications"
+              element={
+                <ProtectedRoute>
+                  <NotificationsPage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/dashboard/profile"
+              element={
+                <ProtectedRoute>
+                  <ProfilePage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/dashboard/settings"
+              element={
+                <ProtectedRoute>
+                  <AccountSettingsPage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/listing/new"
+              element={
+                <ProtectedRoute>
+                  <CreateListingPage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/dashboard/my-listings"
+              element={
+                <ProtectedRoute>
+                  <MyListingsPage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/dashboard/borrowed"
+              element={
+                <ProtectedRoute>
+                  <BorrowedPage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/dashboard/borrowed/:id"
+              element={
+                <ProtectedRoute>
+                  <RequestDetailPage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/dashboard/lending-history"
+              element={
+                <ProtectedRoute>
+                  <LendingHistoryPage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/borrow/request/:itemId"
+              element={
+                <ProtectedRoute>
+                  <RequestDetailPage />
+                </ProtectedRoute>
+              }
+            />
+          </Route>
+        </Routes>
+      </RouteChangeLoader>
+    </LenisProvider>
   );
 }
 

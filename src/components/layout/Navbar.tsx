@@ -36,8 +36,8 @@ export function Navbar({ showSidebarToggle = false }: NavbarProps) {
       if (currentScrollY < 100) {
         setIsVisible(true);
       }
-      // Only trigger hide/show after scrolling at least 100px
-      else if (scrollDifference > 50) {
+      // Only trigger hide/show after scrolling at least 30px
+      else if (scrollDifference > 30) {
         if (currentScrollY > lastScrollY) {
           // Scrolling down - hide navbar
           setIsVisible(false);

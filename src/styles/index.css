@@ -2,6 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Lenis required fixes */
+html,
+body {
+  height: auto;
+}
+
+body {
+  overflow: hidden;
+}
+
 @layer base {
   html {
     font-size: 14px; /* Mobile base */

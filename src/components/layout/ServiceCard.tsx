@@ -109,15 +109,16 @@ const ServiceCard = ({ data, className }: ServiceCardProps) => {
       const cards = gsap.utils.toArray(".service-card");
       gsap.fromTo(
         cards,
-        { y: 100, opacity: 0 },
+        { y: 70, opacity: 0 },
         {
           y: 0,
           opacity: 1,
-          duration: 0.5 ,
-          stagger: 0.1,
+          duration: 0.3,
+          stagger: 0.05,
+          ease: "cubic-bezier(0.25, 1, 0.5, 1)",
           scrollTrigger: {
             trigger: containerRef.current,
-            start: "top 80%",
+            start: "top 90%",
             toggleActions: "play none none reverse",
           },
         }
