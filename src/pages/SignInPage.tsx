@@ -59,10 +59,12 @@ export default function SignInPage() {
     setLoading(true);
     try {
       await signIn(data.email, data.password);
+      console.log("Sign in successful, navigating to dashboard");
       showToast("Signed in successfully!", "success");
       navigate("/dashboard");
-    } catch (error) {
-      showToast("Invalid email or password", "error");
+    } catch (error: any) {
+      console.error("Sign in error:", error);
+      showToast(error.message || "Failed to sign in", "error");
     } finally {
       setLoading(false);
     }

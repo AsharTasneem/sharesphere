@@ -9,7 +9,11 @@ import { CustomSelect } from "@/components/ui/CustomSelect";
 import { Badge } from "@/components/ui/Badge";
 import { formatCurrency } from "@/lib/utils";
 import { CATEGORIES, SORT_OPTIONS } from "@/lib/constants";
-import { Squares2X2Icon, ListBulletIcon } from "@heroicons/react/24/outline";
+import {
+  Squares2X2Icon,
+  ListBulletIcon,
+  MapPinIcon,
+} from "@heroicons/react/24/outline";
 import { useRef } from "react";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
@@ -215,18 +219,19 @@ export default function BrowsePage() {
                       </div>
 
                       <div className="flex items-center justify-center gap-2">
-                        {item.metadata.rating > 0 && (
-                          <div className="text-xs text-gray-300 flex items-center gap-1">
-                            <span className="text-yellow-400">★</span>
-                            <span>{item.metadata.rating.toFixed(1)}</span>
-                            <span className="text-gray-500">
-                              ({item.metadata.reviewCount})
-                            </span>
-                          </div>
-                        )}
+                        <div className="text-xs text-white/90 flex items-center gap-1 font-medium bg-black/30 px-2 py-0.5 rounded-full backdrop-blur-sm">
+                          <span className="text-yellow-400">★</span>
+                          <span>{item.metadata.rating.toFixed(1)}</span>
+                          <span className="text-white/60">
+                            ({item.metadata.reviewCount})
+                          </span>
+                        </div>
                       </div>
-                      <p className="text-[10px] text-gray-500 truncate">
-                        {item.location.displayAddress}
+                      <p className="text-xs text-white/80 truncate font-medium flex items-center justify-center gap-1">
+                        <MapPinIcon className="h-3 w-3" />
+                        {item.location.displayAddress ||
+                          item.location.city ||
+                          "Location N/A"}
                       </p>
                     </div>
                   </div>

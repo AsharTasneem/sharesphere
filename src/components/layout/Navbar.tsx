@@ -158,11 +158,22 @@ export function Navbar({ showSidebarToggle = false }: NavbarProps) {
 
               <div className="relative group">
                 <button className="flex items-center gap-2 p-2 rounded-full hover:bg-gray-100 transition-colors">
-                  <img
-                    src={user?.avatar || "https://i.pravatar.cc/150?img=1"}
-                    alt={user?.name || "User"}
-                    className="h-8 w-8 rounded-full"
-                  />
+                  {user?.avatar ? (
+                    <img
+                      src={user.avatar}
+                      alt={user.name || "User"}
+                      className="h-8 w-8 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="h-8 w-8 rounded-full bg-primary-100 flex items-center justify-center text-primary-600 text-sm font-bold">
+                      {user?.name
+                        ?.split(" ")
+                        .map((n) => n[0])
+                        .join("")
+                        .toUpperCase()
+                        .slice(0, 2) || "U"}
+                    </div>
+                  )}
                 </button>
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
                   <Link

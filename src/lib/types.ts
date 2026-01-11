@@ -6,6 +6,7 @@ export interface User {
   bio?: string;
   phone?: string;
   location: {
+    address?: string;
     city: string;
     state: string;
     country: string;
@@ -14,7 +15,6 @@ export interface User {
   verification: {
     email: boolean;
     phone: boolean;
-    governmentId: 'not_started' | 'pending' | 'verified' | 'rejected';
     address: boolean;
   };
   stats: {
@@ -31,12 +31,12 @@ export interface User {
   preferences: {
     searchRadius: number;
     defaultPickupWindow: string;
-    notificationLevel: 'all' | 'important' | 'minimal';
+    notificationLevel: "all" | "important" | "minimal";
     emailDigest: boolean;
     pushEnabled: boolean;
   };
   payoutMethod?: {
-    type: 'bank' | 'paypal';
+    type: "bank" | "paypal";
     last4?: string;
     verified: boolean;
   };
@@ -53,7 +53,7 @@ export interface Item {
   category: string;
   pricePerDay: number;
   deposit: number;
-  condition: 'new' | 'like_new' | 'good' | 'fair';
+  condition: "new" | "like_new" | "good" | "fair";
   images: string[];
   primaryImage: string;
   location: {
@@ -64,7 +64,7 @@ export interface Item {
     displayAddress: string;
   };
   availability: {
-    type: 'calendar' | 'always' | 'by_request';
+    type: "calendar" | "always" | "by_request";
     blockedDates?: Date[];
     availableDays?: number[];
   };
@@ -78,7 +78,7 @@ export interface Item {
     rating: number;
     reviewCount: number;
   };
-  status: 'draft' | 'published' | 'paused' | 'archived';
+  status: "draft" | "published" | "paused" | "archived";
   createdAt: Date;
   updatedAt: Date;
   publishedAt?: Date;
@@ -93,17 +93,17 @@ export interface Request {
   ownerId: string;
   startDate: Date;
   endDate: Date;
-  status: 
-    | 'pending_owner'
-    | 'accepted'
-    | 'payment_pending'
-    | 'paid'
-    | 'active'
-    | 'returned'
-    | 'completed'
-    | 'cancelled'
-    | 'declined'
-    | 'overdue';
+  status:
+    | "pending_owner"
+    | "accepted"
+    | "payment_pending"
+    | "paid"
+    | "active"
+    | "returned"
+    | "completed"
+    | "cancelled"
+    | "declined"
+    | "overdue";
   pricing: {
     pricePerDay: number;
     days: number;
@@ -113,7 +113,7 @@ export interface Request {
     total: number;
   };
   paymentMethod?: {
-    type: 'card';
+    type: "card";
     last4: string;
   };
   paymentId?: string;
@@ -140,7 +140,7 @@ export interface Message {
   sender?: User;
   recipientId: string;
   text: string;
-  type: 'user' | 'system' | 'quick_reply';
+  type: "user" | "system" | "quick_reply";
   read: boolean;
   imageUrl?: string;
   createdAt: Date;
@@ -150,7 +150,7 @@ export interface Message {
 export interface Notification {
   id: string;
   userId: string;
-  type: 'message' | 'request' | 'system' | 'reminder' | 'payment';
+  type: "message" | "request" | "system" | "reminder" | "payment";
   title: string;
   message: string;
   read: boolean;
@@ -169,7 +169,7 @@ export interface Review {
   reviewerId: string;
   reviewer?: User;
   revieweeId: string;
-  type: 'item' | 'borrower' | 'owner';
+  type: "item" | "borrower" | "owner";
   rating: number;
   comment?: string;
   wouldRecommend: boolean;
@@ -183,6 +183,3 @@ export interface PricingBreakdown {
   deposit: number;
   total: number;
 }
-
-
-

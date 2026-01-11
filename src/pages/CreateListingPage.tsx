@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { itemsApi } from "@/services/api";
+import { supabaseStorageService } from "@/services/supabase/storage.service";
 import { useAuthStore } from "@/stores/authStore";
 import { useUIStore } from "@/stores/uiStore";
 import { Button } from "@/components/ui/Button";
@@ -34,6 +35,8 @@ export default function CreateListingPage() {
   const { user } = useAuthStore();
   const { showToast } = useUIStore();
   const [images, setImages] = useState<string[]>([]);
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [uploadingImages, setUploadingImages] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -52,11 +55,28 @@ export default function CreateListingPage() {
   });
 
   const mutation = useMutation({
-    mutationFn: (data: ListingForm & { images: string[]; ownerId: string }) =>
-      itemsApi.create({
-        // ... existing create logic ...
+    mutationFn: async (data: ListingForm & { images: string[]; ownerId: string }) => {
+      // Upload images first if there are any files
+      let uploadedImageUrls = data.images;
+
+      if (imageFiles.length > 0) {
+        setUploadingImages(true);
+        try {
+          uploadedImageUrls = await supabaseStorageService.uploadItemImages(
+            imageFiles,
+            data.ownerId
+          );
+        } catch (error) {
+          setUploadingImages(false);
+          throw new Error('Failed to upload images');
+        }
+        setUploadingImages(false);
+      }
+
+      return itemsApi.create({
         ...data,
-        primaryImage: data.images[0] || "",
+        images: uploadedImageUrls,
+        primaryImage: uploadedImageUrls[0] || "",
         location: {
           address: user?.location.city || "",
           city: user?.location.city || "",
@@ -68,8 +88,9 @@ export default function CreateListingPage() {
           type: "always",
         },
         tags: [],
-        status: "published", // Set default to published so it shows up
-      }),
+        status: "published",
+      });
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["items"] });
       showToast("Listing created successfully!", "success");
@@ -82,12 +103,15 @@ export default function CreateListingPage() {
 
   const onSubmit = (data: ListingForm) => {
     if (!user) return;
+
+    // Use placeholder image if no images uploaded
+    const imagesToUse = imageFiles.length > 0
+      ? [] // Will be uploaded in mutation
+      : ["https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800"];
+
     mutation.mutate({
       ...data,
-      images:
-        images.length > 0
-          ? images
-          : ["https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800"],
+      images: imagesToUse,
       ownerId: user.id,
     });
   };
@@ -97,11 +121,15 @@ export default function CreateListingPage() {
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files && files.length > 0) {
-      const newImages = Array.from(files).map((file) =>
-        URL.createObjectURL(file)
-      );
-      if (images.length + newImages.length <= 10) {
-        setImages([...images, ...newImages]);
+      const newFiles = Array.from(files);
+
+      if (imageFiles.length + newFiles.length <= 10) {
+        // Store files for upload
+        setImageFiles([...imageFiles, ...newFiles]);
+
+        // Create preview URLs
+        const newPreviews = newFiles.map((file) => URL.createObjectURL(file));
+        setImages([...images, ...newPreviews]);
       } else {
         showToast("You can only upload up to 10 images", "error");
       }
@@ -330,8 +358,12 @@ export default function CreateListingPage() {
         </Card>
 
         <div className="flex gap-3">
-          <Button type="submit" loading={mutation.isPending}>
-            Create Listing
+          <Button
+            type="submit"
+            loading={mutation.isPending || uploadingImages}
+            disabled={uploadingImages}
+          >
+            {uploadingImages ? 'Uploading Images...' : 'Create Listing'}
           </Button>
           <Button
             type="button"

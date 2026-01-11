@@ -11,7 +11,6 @@ import { ITEM_CONDITIONS } from "@/lib/constants";
 import {
   StarIcon,
   MapPinIcon,
-  UserIcon,
   CalendarIcon,
 } from "@heroicons/react/24/solid";
 import { StarIcon as StarOutlineIcon } from "@heroicons/react/24/outline";
@@ -73,11 +72,10 @@ export default function ListingDetailPage() {
                 <button
                   key={idx}
                   onClick={() => setSelectedImage(idx)}
-                  className={`aspect-square rounded-lg overflow-hidden border-2 ${
-                    selectedImage === idx
+                  className={`aspect-square rounded-lg overflow-hidden border-2 ${selectedImage === idx
                       ? "border-primary-600"
                       : "border-transparent"
-                  }`}
+                    }`}
                 >
                   <img
                     src={img}

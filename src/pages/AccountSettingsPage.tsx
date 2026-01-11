@@ -183,21 +183,6 @@ export default function AccountSettingsPage() {
           </div>
           <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
             <div className="flex items-center gap-2">
-              <IdentificationIcon className="h-5 w-5 text-gray-400" />
-              <span className="text-gray-700 font-medium">Government ID</span>
-            </div>
-            {user.verification.governmentId === "verified" ? (
-              <Badge variant="success">Verified</Badge>
-            ) : user.verification.governmentId === "pending" ? (
-              <Badge variant="warning">Pending Review</Badge>
-            ) : (
-              <Button variant="outline" size="sm">
-                Verify Now
-              </Button>
-            )}
-          </div>
-          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-            <div className="flex items-center gap-2">
               <MapPinIcon className="h-5 w-5 text-gray-400" />
               <span className="text-gray-700 font-medium">
                 Address Verification

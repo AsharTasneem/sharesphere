@@ -17,6 +17,7 @@ export const mockUsers: User[] = [
     bio: "Tech enthusiast and outdoor adventurer. Love sharing items with the community!",
     phone: "+1234567890",
     location: {
+      address: "123 Share St",
       city: "San Francisco",
       state: "CA",
       country: "USA",
@@ -25,7 +26,6 @@ export const mockUsers: User[] = [
     verification: {
       email: true,
       phone: true,
-      governmentId: "verified",
       address: true,
     },
     stats: {
@@ -62,7 +62,8 @@ export const mockUsers: User[] = [
     bio: "Home improvement enthusiast. Always happy to help!",
     phone: "+1234567891",
     location: {
-      city: "Oakland",
+      address: "456 Lend Lane",
+      city: "San Jose",
       state: "CA",
       country: "USA",
       coordinates: { lat: 37.8044, lng: -122.2712 },
@@ -70,7 +71,6 @@ export const mockUsers: User[] = [
     verification: {
       email: true,
       phone: true,
-      governmentId: "verified",
       address: false,
     },
     stats: {
