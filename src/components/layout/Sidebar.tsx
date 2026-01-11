@@ -334,15 +334,6 @@ export function Sidebar() {
                   isActive={isActive("/dashboard/profile")}
                   onClick={() => setSidebarOpen(false)}
                 />
-                <SidebarItem
-                  item={{
-                    path: "/dashboard/settings",
-                    label: "Account Settings",
-                    icon: Cog6ToothIcon,
-                  }}
-                  isActive={isActive("/dashboard/settings")}
-                  onClick={() => setSidebarOpen(false)}
-                />
 
                 <SidebarItem
                   item={{

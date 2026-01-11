@@ -12,6 +12,8 @@ import { StarIcon, MapPinIcon, CalendarIcon } from "@heroicons/react/24/solid";
 import { StarIcon as StarOutlineIcon } from "@heroicons/react/24/outline";
 import { EditListingModal } from "@/components/listings/EditListingModal";
 
+import { supabaseRequestsService } from "@/services/supabase/requests.service";
+
 export default function ListingDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -24,6 +26,24 @@ export default function ListingDetailPage() {
     queryFn: () => itemsApi.getById(id!),
     enabled: !!id,
   });
+
+  const { data: userRequests } = useQuery({
+    queryKey: ["user-requests", user?.id],
+    queryFn: () => supabaseRequestsService.getAll(user!.id, "borrower"),
+    enabled: !!user?.id,
+  });
+
+  const existingRequest = userRequests?.find(
+    (req) =>
+      req.itemId === id &&
+      [
+        "pending_owner",
+        "accepted",
+        "payment_pending",
+        "paid",
+        "active",
+      ].includes(req.status)
+  );
 
   if (isLoading) {
     return (
@@ -176,6 +196,10 @@ export default function ListingDetailPage() {
                 onClick={() => setIsEditModalOpen(true)}
               >
                 Edit Listing
+              </Button>
+            ) : existingRequest ? (
+              <Button className="w-full" size="lg" disabled>
+                Request Pending
               </Button>
             ) : (
               <Button

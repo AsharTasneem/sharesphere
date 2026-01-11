@@ -58,7 +58,6 @@ export default function ProfilePage() {
     };
 
   const [name, setName] = useState(user?.name || "");
-  const [email] = useState(user?.email || "");
   const [bio, setBio] = useState(user?.bio || "");
   const [phone, setPhone] = useState(user?.phone || "");
   const [address, setAddress] = useState(user?.location?.address || "");
@@ -103,9 +102,11 @@ export default function ProfilePage() {
   if (!user) return null;
 
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSave = async () => {
     setSaving(true);
+    setError(null); // Clear previous errors
     let profileUpdated = false;
 
     try {
@@ -124,40 +125,18 @@ export default function ProfilePage() {
       });
       profileUpdated = true;
 
-      // 2. Check for Email Change
-      const trimmedEmail = email.trim();
-      console.log(
-        `Checking email update: '${user.email}' -> '${trimmedEmail}'`
-      );
-
-      if (trimmedEmail.toLowerCase() !== user.email.toLowerCase()) {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(trimmedEmail)) {
-          throw new Error(`Invalid email format: '${trimmedEmail}'`);
-        }
-
-        console.log(`Sending updateEmail request for: '${trimmedEmail}'`);
-        await supabaseAuthService.updateEmail(trimmedEmail);
-        alert(
-          `Profile updated! \n\nIMPORTANT: We sent a confirmation link to ${trimmedEmail}. Please check your inbox to verify and complete the email change.`
-        );
-      } else {
-        console.log("Email unchanged (case-insensitive), skipping update.");
-      }
-
       console.log("Save successful, exiting edit mode");
       setEditing(false);
-    } catch (error: any) {
-      console.error("Failed to save profile:", error);
+    } catch (err: any) {
+      console.error("Failed to save profile:", err);
+      const errorMessage = err.message || "Unknown error occurred";
 
       if (profileUpdated) {
-        // If profile saved but email failed
-        alert(
-          `Profile details saved, but failed to update email: ${error.message}`
-        );
-        // Optional: setEditing(false) here if you want to exit anyway, but usually keeping it open to fix email is better
+        // If profile saved but email failed, show specific warning
+        setError(`Profile saved, but email update failed: ${errorMessage}`);
       } else {
-        alert(`Failed to save changes: ${error.message || "Unknown error"}`);
+        // General save failure
+        setError(`Failed to save changes: ${errorMessage}`);
       }
     } finally {
       setSaving(false);
@@ -204,17 +183,16 @@ export default function ProfilePage() {
 
       // 2. Update Profile in DB
       await updateProfile({ avatar: publicUrl });
-    } catch (error: any) {
-      console.error("Error uploading avatar:", error);
-      if (
-        error.message?.includes("bucket not found") ||
-        error.statusCode === "404"
-      ) {
-        alert(
-          "Error: Storage bucket 'avatars' not found.\n\nPlease go to your Supabase Dashboard -> Storage and create a public bucket named 'avatars'."
+    } catch (err: any) {
+      console.error("Error uploading avatar:", err);
+      const errorMessage = err.message || "Failed to upload avatar";
+
+      if (errorMessage.includes("bucket not found") || err.statusCode === "404") {
+        setError(
+          "Storage bucket 'avatars' not found. Please create a public 'avatars' bucket in Supabase."
         );
       } else {
-        alert(error.message || "Failed to upload avatar");
+        setError(errorMessage);
       }
     } finally {
       setUploading(false);
@@ -376,6 +354,11 @@ export default function ProfilePage() {
                     />
                   </div>
                 </div>
+                {error && (
+                  <div className="p-3 bg-red-50 text-red-700 text-sm rounded-md border border-red-200">
+                    {error}
+                  </div>
+                )}
                 <div className="flex gap-3">
                   <Button onClick={handleSave}>Save Changes</Button>
                   <Button
