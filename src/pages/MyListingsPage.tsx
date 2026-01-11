@@ -7,10 +7,12 @@ import { Card } from "@/components/ui/Card";
 import RotatingCard from "@/components/ui/RotatingCards";
 import { Button } from "@/components/ui/Button";
 import { formatCurrency } from "@/lib/utils";
-import { useRef } from "react";
+import { useState, useRef } from "react";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
-import { PlusCircleIcon } from "@heroicons/react/24/outline";
+import { PlusCircleIcon, PencilIcon } from "@heroicons/react/24/outline";
+import { EditListingModal } from "@/components/listings/EditListingModal";
+import { Item } from "@/lib/types";
 
 export default function MyListingsPage() {
   const { user } = useAuthStore();
@@ -22,6 +24,7 @@ export default function MyListingsPage() {
   });
 
   const myItems = allItems.filter((item) => item.ownerId === user?.id);
+  const [editingItem, setEditingItem] = useState<Item | null>(null);
 
   const containerRef = useRef(null);
 
@@ -115,6 +118,19 @@ export default function MyListingsPage() {
                         {item.metadata.views} views
                       </div>
                     </div>
+
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="mt-2 w-full border-white text-white hover:bg-white hover:text-gray-900"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setEditingItem(item);
+                      }}
+                    >
+                      <PencilIcon className="h-4 w-4 mr-2" />
+                      Edit Listing
+                    </Button>
                   </div>
                 }
               >
@@ -146,6 +162,14 @@ export default function MyListingsPage() {
             </div>
           ))}
         </div>
+      )}
+      {editingItem && editingItem.id && (
+        <EditListingModal
+          key={editingItem.id}
+          isOpen={!!editingItem}
+          onClose={() => setEditingItem(null)}
+          item={editingItem}
+        />
       )}
     </div>
   );

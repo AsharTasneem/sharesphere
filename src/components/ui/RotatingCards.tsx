@@ -123,6 +123,9 @@ const StyledWrapper = styled.div<{ $hoverEffect: boolean }>`
       .card:hover .content {
         transform: rotateY(180deg);
       }
+      .card:hover .face-back {
+        z-index: 5;
+      }
     `}
 
   @keyframes rotation {

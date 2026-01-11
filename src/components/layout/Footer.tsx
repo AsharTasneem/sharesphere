@@ -231,7 +231,7 @@ const Footer = ({ className = "" }: FooterProps) => {
                   href="tel:+1234567890"
                   className="text-sm hover:text-primary-900 transition-colors"
                 >
-                  +1 (234) 567-890
+                  +92 300 0000000
                 </a>
               </li>
               <li className="flex items-center gap-3">

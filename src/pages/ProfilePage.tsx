@@ -304,7 +304,7 @@ export default function ProfilePage() {
                     label="Phone"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    placeholder="+1 (555) 000-0000"
+                    placeholder="+92 300 0000000"
                   />
                   <Input
                     label="Address"
