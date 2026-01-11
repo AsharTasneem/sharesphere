@@ -1,4 +1,4 @@
-import { create } from 'zustand';
+import { create } from "zustand";
 
 interface UIStore {
   sidebarOpen: boolean;
@@ -7,8 +7,14 @@ interface UIStore {
   modalOpen: string | null;
   openModal: (id: string) => void;
   closeModal: () => void;
-  toast: { message: string; type: 'success' | 'error' | 'info' | 'warning' } | null;
-  showToast: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
+  toast: {
+    message: string;
+    type: "success" | "error" | "info" | "warning";
+  } | null;
+  showToast: (
+    message: string,
+    type: "success" | "error" | "info" | "warning"
+  ) => void;
   hideToast: () => void;
 }
 
@@ -20,12 +26,12 @@ export const useUIStore = create<UIStore>((set) => ({
   openModal: (id: string) => set({ modalOpen: id }),
   closeModal: () => set({ modalOpen: null }),
   toast: null,
-  showToast: (message: string, type: 'success' | 'error' | 'info' | 'warning') => {
+  showToast: (
+    message: string,
+    type: "success" | "error" | "info" | "warning"
+  ) => {
     set({ toast: { message, type } });
-    setTimeout(() => set({ toast: null }), 5000);
+    setTimeout(() => set({ toast: null }), 4000);
   },
   hideToast: () => set({ toast: null }),
 }));
-
-
-

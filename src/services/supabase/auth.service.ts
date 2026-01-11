@@ -255,8 +255,8 @@ export const supabaseAuthService = {
     if (data.avatar !== undefined) updates.avatar = data.avatar;
 
     if (data.location) {
-      // if (data.location.address !== undefined)
-      //   updates.address = data.location.address;
+      if (data.location.address !== undefined)
+        updates.address = data.location.address;
       if (data.location.city !== undefined) updates.city = data.location.city;
       if (data.location.state !== undefined)
         updates.state = data.location.state;

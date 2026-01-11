@@ -20,7 +20,7 @@ import CreateListingPage from "@/pages/CreateListingPage";
 import MyListingsPage from "@/pages/MyListingsPage";
 import BorrowedPage from "@/pages/BorrowedPage";
 import LendingHistoryPage from "@/pages/LendingHistoryPage";
-import AccountSettingsPage from "@/pages/AccountSettingsPage";
+
 import RequestDetailPage from "@/pages/RequestDetailPage";
 import RouteChangeLoader from "@/components/layout/RouteChangeLoader";
 
@@ -107,15 +107,6 @@ function App() {
               element={
                 <ProtectedRoute>
                   <ProfilePage />
-                </ProtectedRoute>
-              }
-            />
-
-            <Route
-              path="/dashboard/settings"
-              element={
-                <ProtectedRoute>
-                  <AccountSettingsPage />
                 </ProtectedRoute>
               }
             />
