@@ -149,8 +149,10 @@ export const CustomSelect = ({
         // Animate options with stagger for cascading effect
         const options = menuRef.current.querySelectorAll(".option-item");
         if (options.length > 0) {
+          // Only animate the first 12 items to prevent performance issues with large lists (like countries)
+          const itemsToAnimate = Array.from(options).slice(0, 12);
           gsap.fromTo(
-            options,
+            itemsToAnimate,
             {
               opacity: 0,
               x: -15,
@@ -248,7 +250,10 @@ export const CustomSelect = ({
             )}
 
             {/* Options List */}
-            <div className="max-h-60 overflow-y-auto py-2">
+            <div
+              className="max-h-60 overflow-y-auto py-2 overscroll-contain"
+              onWheel={(e) => e.stopPropagation()}
+            >
               {filteredOptions.length === 0 ? (
                 <div className="px-4 py-3 text-sm text-gray-500 text-center">
                   No options found

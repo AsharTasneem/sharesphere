@@ -255,9 +255,13 @@ export const supabaseAuthService = {
     if (data.avatar !== undefined) updates.avatar = data.avatar;
 
     if (data.location) {
-      if (data.location.city) updates.city = data.location.city;
-      if (data.location.state) updates.state = data.location.state;
-      if (data.location.country) updates.country = data.location.country;
+      // if (data.location.address !== undefined)
+      //   updates.address = data.location.address;
+      if (data.location.city !== undefined) updates.city = data.location.city;
+      if (data.location.state !== undefined)
+        updates.state = data.location.state;
+      if (data.location.country !== undefined)
+        updates.country = data.location.country;
       if (data.location.coordinates) {
         updates.latitude = data.location.coordinates.lat;
         updates.longitude = data.location.coordinates.lng;
@@ -276,6 +280,8 @@ export const supabaseAuthService = {
       if (data.preferences.pushEnabled !== undefined)
         updates.push_enabled = data.preferences.pushEnabled;
     }
+
+    console.log("Supabase update payload:", updates);
 
     const { data: profile, error } = (await supabase
       .from("profiles")
