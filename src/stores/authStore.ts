@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { User } from '@/lib/types';
-import { authApi } from '@/services/api';
+import { supabaseAuthService } from '@/services/supabase/auth.service';
 
 interface AuthStore {
   user: User | null;
@@ -20,21 +20,13 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
 
   initialize: async () => {
     try {
-      // Check localStorage first
-      const savedUser = localStorage.getItem('auth_user');
-      if (savedUser) {
-        try {
-          const user = JSON.parse(savedUser);
-          set({ user, isAuthenticated: true, loading: false });
-          return;
-        } catch {
-          // Invalid JSON, clear it
-          localStorage.removeItem('auth_user');
-        }
-      }
-      // Fallback to API
-      const user = await authApi.getCurrentUser();
+      const user = await supabaseAuthService.getCurrentUser();
       set({ user, isAuthenticated: !!user, loading: false });
+
+      // Set up auth state change listener
+      supabaseAuthService.onAuthStateChange((user) => {
+        set({ user, isAuthenticated: !!user });
+      });
     } catch {
       set({ user: null, isAuthenticated: false, loading: false });
     }
@@ -43,9 +35,8 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   signIn: async (email: string, password: string) => {
     set({ loading: true });
     try {
-      const user = await authApi.signIn(email, password);
+      const user = await supabaseAuthService.signIn(email, password);
       set({ user, isAuthenticated: true, loading: false });
-      localStorage.setItem('auth_user', JSON.stringify(user));
     } catch (error) {
       set({ loading: false });
       throw error;
@@ -55,29 +46,35 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   signUp: async (data: { email: string; password: string; name: string }) => {
     set({ loading: true });
     try {
-      const user = await authApi.signUp(data);
+      const user = await supabaseAuthService.signUp(data);
       set({ user, isAuthenticated: true, loading: false });
-      localStorage.setItem('auth_user', JSON.stringify(user));
     } catch (error) {
       set({ loading: false });
       throw error;
     }
   },
 
-  signOut: () => {
-    set({ user: null, isAuthenticated: false });
-    localStorage.removeItem('auth_user');
+  signOut: async () => {
+    try {
+      await supabaseAuthService.signOut();
+      set({ user: null, isAuthenticated: false });
+    } catch (error) {
+      console.error('Sign out error:', error);
+      // Still clear local state even if API call fails
+      set({ user: null, isAuthenticated: false });
+    }
   },
 
   updateProfile: async (data: Partial<User>) => {
     const { user } = get();
     if (!user) return;
-    
-    const updatedUser = { ...user, ...data, updatedAt: new Date() };
-    set({ user: updatedUser });
-    localStorage.setItem('auth_user', JSON.stringify(updatedUser));
+
+    try {
+      const updatedUser = await supabaseAuthService.updateProfile(user.id, data);
+      set({ user: updatedUser });
+    } catch (error) {
+      console.error('Update profile error:', error);
+      throw error;
+    }
   },
 }));
-
-
-
