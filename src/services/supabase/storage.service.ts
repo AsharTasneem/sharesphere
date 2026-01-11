@@ -1,61 +1,43 @@
-import { supabase } from '@/lib/supabaseClient';
+import { supabase } from "@/lib/supabaseClient";
 
 export const supabaseStorageService = {
-    /**
-     * Upload an item image to Supabase Storage
-     */
-    uploadItemImage: async (file: File, userId: string): Promise<string> => {
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${userId}/${Date.now()}.${fileExt}`;
+  /**
+   * Upload an avatar image for a specific user
+   * @param file The file object to upload
+   * @param userId The ID of the user
+   * @returns The public URL of the uploaded image
+   */
+  uploadAvatar: async (file: File, userId: string): Promise<string> => {
+    // 1. Validate file type and size
+    if (!file.type.startsWith("image/")) {
+      throw new Error("File must be an image");
+    }
 
-        const { data, error } = await supabase.storage
-            .from('item-images')
-            .upload(fileName, file, {
-                cacheControl: '3600',
-                upsert: false,
-            });
+    // Max size 5MB
+    if (file.size > 5 * 1024 * 1024) {
+      throw new Error("File size must be less than 5MB");
+    }
 
-        if (error) throw error;
-        if (!data) throw new Error('Failed to upload image');
+    // 2. Generate a unique file path: avatars/{userId}/{timestamp}.{ext}
+    const fileExt = file.name.split(".").pop();
+    const fileName = `${Date.now()}.${fileExt}`;
+    const filePath = `${userId}/${fileName}`;
 
-        return supabaseStorageService.getPublicUrl(data.path);
-    },
+    // 3. Upload to Supabase Storage
+    const { error: uploadError } = await supabase.storage
+      .from("avatars")
+      .upload(filePath, file, {
+        cacheControl: "3600",
+        upsert: false,
+      });
 
-    /**
-     * Upload multiple item images
-     */
-    uploadItemImages: async (files: File[], userId: string): Promise<string[]> => {
-        const uploadPromises = files.map((file) =>
-            supabaseStorageService.uploadItemImage(file, userId)
-        );
+    if (uploadError) {
+      throw uploadError;
+    }
 
-        return Promise.all(uploadPromises);
-    },
+    // 4. Get Public URL
+    const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
 
-    /**
-     * Delete an item image from storage
-     */
-    deleteItemImage: async (path: string): Promise<void> => {
-        // Extract path from URL if full URL is provided
-        const filePath = path.includes('item-images/')
-            ? path.split('item-images/')[1]
-            : path;
-
-        const { error } = await supabase.storage
-            .from('item-images')
-            .remove([filePath]);
-
-        if (error) throw error;
-    },
-
-    /**
-     * Get public URL for an image
-     */
-    getPublicUrl: (path: string): string => {
-        const { data } = supabase.storage
-            .from('item-images')
-            .getPublicUrl(path);
-
-        return data.publicUrl;
-    },
+    return data.publicUrl;
+  },
 };

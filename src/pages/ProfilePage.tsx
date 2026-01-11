@@ -1,5 +1,8 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useAuthStore } from "@/stores/authStore";
+import { supabaseAuthService } from "@/services/supabase/auth.service";
+import { supabaseStorageService } from "@/services/supabase/storage.service";
+import { Modal } from "@/components/ui/Modal";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -7,7 +10,6 @@ import { Textarea } from "@/components/ui/Textarea";
 import { Badge } from "@/components/ui/Badge";
 import { formatDate } from "@/lib/utils";
 import {
-  CheckBadgeIcon,
   StarIcon,
   EnvelopeIcon,
   PhoneIcon,
@@ -27,12 +29,88 @@ export default function ProfilePage() {
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(user?.name || "");
   const [bio, setBio] = useState(user?.bio || "");
+  const [phone, setPhone] = useState(user?.phone || "");
+  const [address, setAddress] = useState(user?.location?.address || "");
+  const [city, setCity] = useState(user?.location?.city || "");
+  const [state, setState] = useState(user?.location?.state || "");
+  const [country, setCountry] = useState(user?.location?.country || "");
+
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [newEmail, setNewEmail] = useState("");
+
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   if (!user) return null;
 
   const handleSave = async () => {
-    await updateProfile({ name, bio });
+    await updateProfile({
+      name,
+      bio,
+      phone,
+      location: {
+        ...user.location,
+        address,
+        city,
+        state,
+        country,
+      },
+    });
     setEditing(false);
+  };
+
+  const handleUpdateEmail = async () => {
+    try {
+      await supabaseAuthService.updateEmail(newEmail);
+      setShowEmailModal(false);
+      // Toast or notification here would be good
+    } catch (error) {
+      console.error("Failed to update email", error);
+    }
+  };
+
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    if (!event.target.files || event.target.files.length === 0) {
+      return;
+    }
+
+    const file = event.target.files[0];
+    setUploading(true);
+
+    try {
+      // 1. Upload to Storage
+      const publicUrl = await supabaseStorageService.uploadAvatar(
+        file,
+        user.id
+      );
+
+      // 2. Update Profile in DB
+      await updateProfile({ avatar: publicUrl });
+    } catch (error: any) {
+      console.error("Error uploading avatar:", error);
+      if (
+        error.message?.includes("bucket not found") ||
+        error.statusCode === "404"
+      ) {
+        alert(
+          "Error: Storage bucket 'avatars' not found.\n\nPlease go to your Supabase Dashboard -> Storage and create a public bucket named 'avatars'."
+        );
+      } else {
+        alert(error.message || "Failed to upload avatar");
+      }
+    } finally {
+      setUploading(false);
+      // Reset input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
   };
 
   return (
@@ -49,18 +127,46 @@ export default function ProfilePage() {
         <div className="flex flex-col sm:flex-row items-start gap-6">
           <div className="relative group">
             <div className="relative">
-              <img
-                src={user.avatar || "https://i.pravatar.cc/150?img=1"}
-                alt={user.name}
-                className="w-32 h-32 rounded-full border-4 border-white shadow-lg"
-              />
+              {user.avatar ? (
+                <img
+                  src={user.avatar}
+                  alt={user.name}
+                  className="w-32 h-32 rounded-full border-4 border-white shadow-lg object-cover"
+                />
+              ) : (
+                <div className="w-32 h-32 rounded-full border-4 border-white shadow-lg bg-primary-100 flex items-center justify-center text-primary-600 text-4xl font-bold">
+                  {user.name
+                    ?.split(" ")
+                    .map((n) => n[0])
+                    .join("")
+                    .toUpperCase()
+                    .slice(0, 2) || "U"}
+                </div>
+              )}
               <button
-                className="absolute bottom-0 right-0 p-2 bg-primary-600 text-white rounded-full shadow-lg hover:bg-primary-700 transition-colors opacity-0 group-hover:opacity-100"
+                className="absolute bottom-0 right-0 p-2 bg-primary-600 text-white rounded-full shadow-lg hover:bg-primary-700 transition-colors opacity-100 disabled:opacity-50"
                 aria-label="Change avatar"
+                onClick={handleAvatarClick}
+                disabled={uploading}
               >
-                <CameraIcon className="h-5 w-5" />
+                {uploading ? (
+                  <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <CameraIcon className="h-5 w-5" />
+                )}
               </button>
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                accept="image/*"
+                className="hidden"
+              />
             </div>
+            {/* Added helper text */}
+            <p className="text-xs text-center text-gray-500 mt-2">
+              Click icon to change
+            </p>
           </div>
           <div className="flex-1 w-full">
             {editing ? (
@@ -78,6 +184,36 @@ export default function ProfilePage() {
                   rows={4}
                   placeholder="Tell others about yourself..."
                 />
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Input
+                    label="Phone"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="+1 (555) 000-0000"
+                  />
+                  <Input
+                    label="Address"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    placeholder="123 Main St"
+                  />
+                  <Input
+                    label="City"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                  />
+                  <Input
+                    label="State"
+                    value={state}
+                    onChange={(e) => setState(e.target.value)}
+                  />
+                  <Input
+                    label="Country"
+                    value={country}
+                    onChange={(e) => setCountry(e.target.value)}
+                  />
+                </div>
                 <div className="flex gap-3">
                   <Button onClick={handleSave}>Save Changes</Button>
                   <Button
@@ -85,6 +221,11 @@ export default function ProfilePage() {
                     onClick={() => {
                       setName(user.name);
                       setBio(user.bio || "");
+                      setPhone(user.phone || "");
+                      setAddress(user.location.address || "");
+                      setCity(user.location.city || "");
+                      setState(user.location.state || "");
+                      setCountry(user.location.country || "");
                       setEditing(false);
                     }}
                   >
@@ -232,23 +373,12 @@ export default function ProfilePage() {
               {user.verification.phone ? (
                 <Badge variant="success">Verified</Badge>
               ) : (
-                <Button variant="outline" size="sm">
-                  Verify
-                </Button>
-              )}
-            </div>
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-              <div className="flex items-center gap-2">
-                <IdentificationIcon className="h-5 w-5 text-gray-400" />
-                <span className="text-gray-700 font-medium">Government ID</span>
-              </div>
-              {user.verification.governmentId === "verified" ? (
-                <Badge variant="success">Verified</Badge>
-              ) : user.verification.governmentId === "pending" ? (
-                <Badge variant="warning">Pending</Badge>
-              ) : (
-                <Button variant="outline" size="sm">
-                  Verify
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setEditing(true)}
+                >
+                  Edit
                 </Button>
               )}
             </div>
@@ -260,8 +390,12 @@ export default function ProfilePage() {
               {user.verification.address ? (
                 <Badge variant="success">Verified</Badge>
               ) : (
-                <Button variant="outline" size="sm">
-                  Verify
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setEditing(true)}
+                >
+                  Edit
                 </Button>
               )}
             </div>
@@ -271,14 +405,27 @@ export default function ProfilePage() {
 
       {/* Contact Information */}
       <Card>
-        <h3 className="font-semibold text-gray-900 mb-4">
-          Contact Information
-        </h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-semibold text-gray-900">Contact Information</h3>
+          <Button variant="outline" size="sm" onClick={() => setEditing(true)}>
+            <PencilIcon className="h-4 w-4 mr-2" />
+            Edit Profile
+          </Button>
+        </div>
+
         <div className="grid md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email
-            </label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-sm font-medium text-gray-700">
+                Email
+              </label>
+              <button
+                onClick={() => setShowEmailModal(true)}
+                className="text-primary-600 hover:text-primary-700 text-xs font-medium"
+              >
+                Change Email
+              </button>
+            </div>
             <p className="text-gray-900">{user.email}</p>
           </div>
           {user.phone && (
@@ -294,12 +441,39 @@ export default function ProfilePage() {
               Location
             </label>
             <p className="text-gray-900">
+              {user.location.address ? `${user.location.address}, ` : ""}
               {user.location.city}, {user.location.state},{" "}
               {user.location.country}
             </p>
           </div>
         </div>
       </Card>
+
+      <Modal
+        isOpen={showEmailModal}
+        onClose={() => setShowEmailModal(false)}
+        title="Update Email"
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-gray-600">
+            Enter your new email address. We will send a verification link to
+            the new address.
+          </p>
+          <Input
+            label="New Email"
+            type="email"
+            value={newEmail}
+            onChange={(e) => setNewEmail(e.target.value)}
+            placeholder="you@example.com"
+          />
+          <div className="flex justify-end gap-3 pt-4">
+            <Button variant="outline" onClick={() => setShowEmailModal(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleUpdateEmail}>Update Email</Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

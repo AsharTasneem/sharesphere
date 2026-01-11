@@ -1,15 +1,20 @@
-import { create } from 'zustand';
-import { User } from '@/lib/types';
-import { supabaseAuthService } from '@/services/supabase/auth.service';
+import { create } from "zustand";
+import { User } from "@/lib/types";
+import { supabaseAuthService } from "@/services/supabase/auth.service";
 
 interface AuthStore {
   user: User | null;
   isAuthenticated: boolean;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (data: { email: string; password: string; name: string }) => Promise<void>;
+  signUp: (data: {
+    email: string;
+    password: string;
+    name: string;
+  }) => Promise<void>;
   signOut: () => void;
   updateProfile: (data: Partial<User>) => Promise<void>;
+  refreshUser: () => Promise<void>;
   initialize: () => Promise<void>;
 }
 
@@ -27,8 +32,18 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       supabaseAuthService.onAuthStateChange((user) => {
         set({ user, isAuthenticated: !!user });
       });
-    } catch {
+    } catch (error) {
+      console.error("Auth initialization error:", error);
       set({ user: null, isAuthenticated: false, loading: false });
+    }
+  },
+
+  refreshUser: async () => {
+    try {
+      const user = await supabaseAuthService.getCurrentUser();
+      set({ user });
+    } catch (error) {
+      console.error("Failed to refresh user:", error);
     }
   },
 
@@ -59,7 +74,7 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       await supabaseAuthService.signOut();
       set({ user: null, isAuthenticated: false });
     } catch (error) {
-      console.error('Sign out error:', error);
+      console.error("Sign out error:", error);
       // Still clear local state even if API call fails
       set({ user: null, isAuthenticated: false });
     }
@@ -70,10 +85,13 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
     if (!user) return;
 
     try {
-      const updatedUser = await supabaseAuthService.updateProfile(user.id, data);
+      const updatedUser = await supabaseAuthService.updateProfile(
+        user.id,
+        data
+      );
       set({ user: updatedUser });
     } catch (error) {
-      console.error('Update profile error:', error);
+      console.error("Update profile error:", error);
       throw error;
     }
   },

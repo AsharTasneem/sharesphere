@@ -70,6 +70,7 @@ export default function SignUpPage() {
         password: data.password,
         name: data.name,
       });
+      console.log("Signup successful, navigating to dashboard");
       showToast("Account created successfully!", "success");
       navigate("/dashboard");
     } catch (error) {

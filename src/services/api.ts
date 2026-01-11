@@ -1,10 +1,17 @@
-import { User, Item, Request, Message, Notification, Review } from '@/lib/types';
-import { supabaseAuthService } from './supabase/auth.service';
-import { supabaseItemsService } from './supabase/items.service';
-import { supabaseRequestsService } from './supabase/requests.service';
-import { supabaseMessagesService } from './supabase/messages.service';
-import { supabaseNotificationsService } from './supabase/notifications.service';
-import { supabaseReviewsService } from './supabase/reviews.service';
+import {
+  User,
+  Item,
+  Request,
+  Message,
+  Notification,
+  Review,
+} from "@/lib/types";
+import { supabaseAuthService } from "./supabase/auth.service";
+import { supabaseItemsService } from "./supabase/items.service";
+import { supabaseRequestsService } from "./supabase/requests.service";
+import { supabaseMessagesService } from "./supabase/messages.service";
+import { supabaseNotificationsService } from "./supabase/notifications.service";
+import { supabaseReviewsService } from "./supabase/reviews.service";
 
 // Auth API - Now using Supabase
 export const authApi = {
@@ -12,7 +19,11 @@ export const authApi = {
     return supabaseAuthService.signIn(email, password);
   },
 
-  signUp: async (data: { email: string; password: string; name: string }): Promise<User> => {
+  signUp: async (data: {
+    email: string;
+    password: string;
+    name: string;
+  }): Promise<User> => {
     return supabaseAuthService.signUp(data);
   },
 
@@ -37,7 +48,9 @@ export const itemsApi = {
     return supabaseItemsService.getById(id);
   },
 
-  create: async (data: Omit<Item, 'id' | 'createdAt' | 'updatedAt' | 'metadata'>): Promise<Item> => {
+  create: async (
+    data: Omit<Item, "id" | "createdAt" | "updatedAt" | "metadata">
+  ): Promise<Item> => {
     return supabaseItemsService.create(data);
   },
 
@@ -52,7 +65,10 @@ export const itemsApi = {
 
 // Requests API - Now using Supabase
 export const requestsApi = {
-  getAll: async (userId?: string, role?: 'borrower' | 'owner'): Promise<Request[]> => {
+  getAll: async (
+    userId?: string,
+    role?: "borrower" | "owner"
+  ): Promise<Request[]> => {
     return supabaseRequestsService.getAll(userId, role);
   },
 
@@ -60,7 +76,9 @@ export const requestsApi = {
     return supabaseRequestsService.getById(id);
   },
 
-  create: async (data: Omit<Request, 'id' | 'createdAt' | 'updatedAt'>): Promise<Request> => {
+  create: async (
+    data: Omit<Request, "id" | "createdAt" | "updatedAt">
+  ): Promise<Request> => {
     return supabaseRequestsService.create(data);
   },
 
@@ -75,7 +93,9 @@ export const messagesApi = {
     return supabaseMessagesService.getByRequestId(requestId);
   },
 
-  send: async (data: Omit<Message, 'id' | 'createdAt' | 'read' | 'readAt'>): Promise<Message> => {
+  send: async (
+    data: Omit<Message, "id" | "createdAt" | "read" | "readAt">
+  ): Promise<Message> => {
     return supabaseMessagesService.send(data);
   },
 
@@ -105,7 +125,11 @@ export const reviewsApi = {
     return supabaseReviewsService.getByItemId(itemId);
   },
 
-  create: async (data: Omit<Review, 'id' | 'createdAt'>): Promise<Review> => {
+  getByRevieweeId: async (userId: string): Promise<Review[]> => {
+    return supabaseReviewsService.getByRevieweeId(userId);
+  },
+
+  create: async (data: Omit<Review, "id" | "createdAt">): Promise<Review> => {
     return supabaseReviewsService.create(data);
   },
 };
