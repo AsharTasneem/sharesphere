@@ -8,18 +8,16 @@ import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { ITEM_CONDITIONS } from "@/lib/constants";
-import {
-  StarIcon,
-  MapPinIcon,
-  CalendarIcon,
-} from "@heroicons/react/24/solid";
+import { StarIcon, MapPinIcon, CalendarIcon } from "@heroicons/react/24/solid";
 import { StarIcon as StarOutlineIcon } from "@heroicons/react/24/outline";
+import { EditListingModal } from "@/components/listings/EditListingModal";
 
 export default function ListingDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuthStore();
   const [selectedImage, setSelectedImage] = useState(0);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const { data: item, isLoading } = useQuery({
     queryKey: ["item", id],
@@ -72,10 +70,11 @@ export default function ListingDetailPage() {
                 <button
                   key={idx}
                   onClick={() => setSelectedImage(idx)}
-                  className={`aspect-square rounded-lg overflow-hidden border-2 ${selectedImage === idx
+                  className={`aspect-square rounded-lg overflow-hidden border-2 ${
+                    selectedImage === idx
                       ? "border-primary-600"
                       : "border-transparent"
-                    }`}
+                  }`}
                 >
                   <img
                     src={img}
@@ -174,7 +173,7 @@ export default function ListingDetailPage() {
               <Button
                 className="w-full"
                 size="lg"
-                onClick={() => navigate(`/listing/${item.id}/edit`)}
+                onClick={() => setIsEditModalOpen(true)}
               >
                 Edit Listing
               </Button>
@@ -240,6 +239,12 @@ export default function ListingDetailPage() {
         </h3>
         <p className="text-gray-700">{item.pickupInstructions}</p>
       </Card>
+
+      <EditListingModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        item={item}
+      />
     </div>
   );
 }

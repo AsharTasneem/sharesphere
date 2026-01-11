@@ -55,7 +55,9 @@ export default function CreateListingPage() {
   });
 
   const mutation = useMutation({
-    mutationFn: async (data: ListingForm & { images: string[]; ownerId: string }) => {
+    mutationFn: async (
+      data: ListingForm & { images: string[]; ownerId: string }
+    ) => {
       // Upload images first if there are any files
       let uploadedImageUrls = data.images;
 
@@ -66,9 +68,10 @@ export default function CreateListingPage() {
             imageFiles,
             data.ownerId
           );
-        } catch (error) {
+        } catch (error: any) {
           setUploadingImages(false);
-          throw new Error('Failed to upload images');
+          console.error("Upload failed details:", error);
+          throw new Error(error.message || "Failed to upload images");
         }
         setUploadingImages(false);
       }
@@ -96,8 +99,9 @@ export default function CreateListingPage() {
       showToast("Listing created successfully!", "success");
       navigate("/dashboard/my-listings");
     },
-    onError: () => {
-      showToast("Failed to create listing", "error");
+    onError: (error) => {
+      console.error("Create listing error:", error);
+      showToast(`Failed to create listing: ${error.message}`, "error");
     },
   });
 
@@ -105,9 +109,10 @@ export default function CreateListingPage() {
     if (!user) return;
 
     // Use placeholder image if no images uploaded
-    const imagesToUse = imageFiles.length > 0
-      ? [] // Will be uploaded in mutation
-      : ["https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800"];
+    const imagesToUse =
+      imageFiles.length > 0
+        ? [] // Will be uploaded in mutation
+        : ["https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800"];
 
     mutation.mutate({
       ...data,
@@ -363,7 +368,7 @@ export default function CreateListingPage() {
             loading={mutation.isPending || uploadingImages}
             disabled={uploadingImages}
           >
-            {uploadingImages ? 'Uploading Images...' : 'Create Listing'}
+            {uploadingImages ? "Uploading Images..." : "Create Listing"}
           </Button>
           <Button
             type="button"
