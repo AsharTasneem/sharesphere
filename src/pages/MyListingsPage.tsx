@@ -16,7 +16,6 @@ import { Item } from "@/lib/types";
 
 export default function MyListingsPage() {
   const { user } = useAuthStore();
-  const navigate = useNavigate();
 
   const { data: allItems = [], isLoading } = useQuery({
     queryKey: ["items"],
@@ -24,28 +23,22 @@ export default function MyListingsPage() {
   });
 
   const myItems = allItems.filter((item) => item.ownerId === user?.id);
-  const [editingItem, setEditingItem] = useState<Item | null>(null);
 
   const containerRef = useRef(null);
 
+  const showSkeleton = isLoading && myItems.length === 0;
+
   useGSAP(
     () => {
-      // Only animate if not loading
-      if (isLoading) return;
-
+      // Header animation only - independent of data loading
       const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
       tl.fromTo(
         ".page-title",
         { y: 30, opacity: 0 },
         { y: 0, opacity: 1, duration: 0.8 }
-      ).fromTo(
-        ".listing-card",
-        { y: 20, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.1, stagger: 0.1 },
-        "-=0.4"
       );
     },
-    { scope: containerRef, dependencies: [isLoading, myItems.length] }
+    { scope: containerRef }
   );
 
   return (
@@ -63,7 +56,7 @@ export default function MyListingsPage() {
         </Link>
       </div>
 
-      {isLoading ? (
+      {showSkeleton ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {[...Array(8)].map((_, i) => (
             <div
@@ -92,77 +85,104 @@ export default function MyListingsPage() {
           </div>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {myItems.map((item) => (
-            <div key={item.id} className="listing-card opacity-0 h-80">
-              <RotatingCard
-                hoverEffect
-                className="h-full w-full cursor-pointer"
-                onClick={() => navigate(`/listing/${item.id}`)}
-                backContent={
-                  <div className="flex flex-col h-full justify-between p-2 text-center relative">
-                    <div className="mt-2">
-                      <p className="text-gray-300 text-xs line-clamp-3 mb-3">
-                        {item.description}
-                      </p>
-                    </div>
+        <MyListingsResults myItems={myItems} />
+      )}
+    </div>
+  );
+}
 
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-center gap-1">
-                        <span className="text-xl font-bold text-white">
-                          {formatCurrency(item.pricePerDay)}
-                        </span>
-                        <span className="text-gray-400 text-xs">/day</span>
-                      </div>
-                      <div className="text-sm text-gray-400">
-                        {item.metadata.views} views
-                      </div>
-                    </div>
+function MyListingsResults({ myItems }: { myItems: any[] }) {
+  const navigate = useNavigate();
+  const [editingItem, setEditingItem] = useState<Item | null>(null);
+  const containerRef = useRef(null);
 
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="mt-2 w-full border-white text-white hover:bg-white hover:text-gray-900"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setEditingItem(item);
-                      }}
-                    >
-                      <PencilIcon className="h-4 w-4 mr-2" />
-                      Edit Listing
-                    </Button>
+  useGSAP(
+    () => {
+      const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+      tl.fromTo(
+        ".listing-card",
+        { y: 20, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.1, stagger: 0.1 }
+      );
+    },
+    { scope: containerRef, dependencies: [myItems.length] }
+  );
+
+  return (
+    <>
+      <div
+        ref={containerRef}
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+      >
+        {myItems.map((item) => (
+          <div key={item.id} className="listing-card opacity-0 h-80">
+            <RotatingCard
+              hoverEffect
+              className="h-full w-full cursor-pointer"
+              onClick={() => navigate(`/listing/${item.id}`)}
+              backContent={
+                <div className="flex flex-col h-full justify-between p-2 text-center relative">
+                  <div className="mt-2">
+                    <p className="text-gray-300 text-xs line-clamp-3 mb-3">
+                      {item.description}
+                    </p>
                   </div>
-                }
-              >
-                <div className="w-full h-80 relative">
-                  <img
-                    src={item.primaryImage}
-                    alt={item.title}
-                    className="absolute inset-0 w-full h-full object-cover rounded-[5px]"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent rounded-[5px]" />
 
-                  <div className="absolute bottom-0 left-0 w-full p-4 text-left z-10">
-                    <div className="flex justify-between items-end">
-                      <h3 className="text-white font-bold text-lg line-clamp-2 leading-tight drop-shadow-md mb-2 flex-1 mr-2">
-                        {item.title}
-                      </h3>
-                      <div className="flex flex-col items-end gap-1">
-                        <span className="text-lg font-bold text-white drop-shadow-md">
-                          {formatCurrency(item.pricePerDay)}
-                          <span className="text-xs font-normal opacity-80">
-                            /day
-                          </span>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-center gap-1">
+                      <span className="text-xl font-bold text-white">
+                        {formatCurrency(item.pricePerDay)}
+                      </span>
+                      <span className="text-gray-400 text-xs">/day</span>
+                    </div>
+                    <div className="text-sm text-gray-400">
+                      {item.metadata.views} views
+                    </div>
+                  </div>
+
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="mt-2 w-full border-white text-white hover:bg-white hover:text-gray-900"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setEditingItem(item);
+                    }}
+                  >
+                    <PencilIcon className="h-4 w-4 mr-2" />
+                    Edit Listing
+                  </Button>
+                </div>
+              }
+            >
+              <div className="w-full h-80 relative">
+                <img
+                  src={item.primaryImage}
+                  alt={item.title}
+                  className="absolute inset-0 w-full h-full object-cover rounded-[5px]"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent rounded-[5px]" />
+
+                <div className="absolute bottom-0 left-0 w-full p-4 text-left z-10">
+                  <div className="flex justify-between items-end">
+                    <h3 className="text-white font-bold text-lg line-clamp-2 leading-tight drop-shadow-md mb-2 flex-1 mr-2">
+                      {item.title}
+                    </h3>
+                    <div className="flex flex-col items-end gap-1">
+                      <span className="text-lg font-bold text-white drop-shadow-md">
+                        {formatCurrency(item.pricePerDay)}
+                        <span className="text-xs font-normal opacity-80">
+                          /day
                         </span>
-                      </div>
+                      </span>
                     </div>
                   </div>
                 </div>
-              </RotatingCard>
-            </div>
-          ))}
-        </div>
-      )}
+              </div>
+            </RotatingCard>
+          </div>
+        ))}
+      </div>
       {editingItem && editingItem.id && (
         <EditListingModal
           key={editingItem.id}
@@ -171,6 +191,6 @@ export default function MyListingsPage() {
           item={editingItem}
         />
       )}
-    </div>
+    </>
   );
 }
