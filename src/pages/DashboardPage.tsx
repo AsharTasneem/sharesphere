@@ -1,7 +1,8 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useAuthStore } from "@/stores/authStore";
-import { requestsApi, reviewsApi } from "@/services/api";
+import { requestsApi } from "@/services/api";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -14,7 +15,12 @@ import {
 } from "@heroicons/react/24/outline";
 
 export default function DashboardPage() {
-  const { user } = useAuthStore();
+  const { user, refreshUser } = useAuthStore();
+
+  // Refresh user data on mount to ensure stats are up to date (synced by DB triggers)
+  useEffect(() => {
+    refreshUser();
+  }, []);
 
   const { data: borrowerRequests = [] } = useQuery({
     queryKey: ["requests", "borrower", user?.id],
@@ -28,28 +34,19 @@ export default function DashboardPage() {
     enabled: !!user,
   });
 
-  const { data: reviews = [] } = useQuery({
-    queryKey: ["reviews", "user", user?.id],
-    queryFn: () => reviewsApi.getByRevieweeId(user?.id || ""),
-    enabled: !!user,
-  });
-
+  // Broader filter for active rentals (to match profile stats logic)
   const activeBorrows = borrowerRequests.filter((r) =>
-    ["active", "paid"].includes(r.status)
+    ["active", "paid", "payment_pending", "returned", "overdue"].includes(
+      r.status
+    )
   );
   const pendingRequests = ownerRequests.filter(
     (r) => r.status === "pending_owner"
   );
 
-  // Calculate dynamic stats
-  const totalLent = ownerRequests.filter((r) =>
-    ["completed", "returned"].includes(r.status)
-  ).length;
-
-  const averageRating =
-    reviews.length > 0
-      ? reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length
-      : 0;
+  // Use dynamic stats from user profile (Source of Truth)
+  const totalLent = user?.stats?.totalLent || 0;
+  const averageRating = user?.stats?.rating || 0;
 
   const dueThisWeek = borrowerRequests.filter((r) => {
     if (r.status !== "active") return false;

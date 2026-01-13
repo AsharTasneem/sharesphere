@@ -31,19 +31,22 @@ import { EmailUpdateModal } from "@/components/profile/EmailUpdateModal";
 import { statsService, UserStats } from "@/services/supabase/stats.service";
 
 export default function ProfilePage() {
-  const { user, updateProfile } = useAuthStore();
+  const { user, updateProfile, refreshUser } = useAuthStore();
   const [editing, setEditing] = useState(false);
   // Dynamic stats state
   const [stats, setStats] = useState<UserStats | null>(null);
 
-  // Fetch dynamic stats on mount
+  // Fetch dynamic stats on mount and refresh user to get latest DB values (fed by triggers)
   useEffect(() => {
     if (user?.id) {
-      statsService.getUserStats(user.id).then((fetchedStats) => {
-        setStats(fetchedStats);
+      // 1. Fetch purely dynamic stats for immediate display
+      statsService.getUserStats(user.id).then(() => {
+        setStats(user?.stats);
       });
+      // 2. Refresh user from DB to ensure 'user.stats' (fallback) is also up to date
+      refreshUser();
     }
-  }, [user?.id]);
+  }, []);
 
   // Use dynamic stats if available, otherwise fall back to user object (or 0)
   const displayStats = stats ||
@@ -117,7 +120,7 @@ export default function ProfilePage() {
         phone,
         location: {
           ...(user.location || {}),
-          address: address || null,
+          address: address || undefined,
           city,
           state,
           country: "Pakistan",
@@ -187,7 +190,10 @@ export default function ProfilePage() {
       console.error("Error uploading avatar:", err);
       const errorMessage = err.message || "Failed to upload avatar";
 
-      if (errorMessage.includes("bucket not found") || err.statusCode === "404") {
+      if (
+        errorMessage.includes("bucket not found") ||
+        err.statusCode === "404"
+      ) {
         setError(
           "Storage bucket 'avatars' not found. Please create a public 'avatars' bucket in Supabase."
         );
