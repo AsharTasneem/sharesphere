@@ -37,7 +37,7 @@ export function dbProfileToUser(profile: Tables<"profiles">): User {
       address: profile.address_verified,
     },
     stats: {
-      rating: profile.rating,
+      rating: Math.min(profile.rating || 0, 4.9),
       reviewCount: profile.review_count,
       totalBorrowed: profile.total_borrowed,
       totalLent: profile.total_lent,

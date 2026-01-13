@@ -45,23 +45,19 @@ export default function BrowsePage() {
 
   const containerRef = useRef(null);
 
+  const showSkeleton = isLoading && items.length === 0;
+
   useGSAP(
     () => {
-      if (isLoading) return;
-
+      // Header animation only - independent of data loading
       const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
       tl.fromTo(
         ".page-header",
         { y: 30, opacity: 0 },
         { y: 0, opacity: 1, duration: 0.8 }
-      ).fromTo(
-        ".item-card-container",
-        { y: 20, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.6, stagger: 0.05 },
-        "-=0.4"
       );
     },
-    { scope: containerRef, dependencies: [isLoading, items, viewMode] }
+    { scope: containerRef }
   );
 
   return (
@@ -170,7 +166,7 @@ export default function BrowsePage() {
         </div>
       </div>
 
-      {isLoading ? (
+      {showSkeleton ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {[...Array(8)].map((_, i) => (
             <div
@@ -192,9 +188,40 @@ export default function BrowsePage() {
           <p className="text-gray-600 text-lg mb-4">No items found</p>
           <p className="text-gray-500">Try adjusting your search or filters</p>
         </div>
-      ) : viewMode === "grid" ? (
+      ) : (
+        <BrowseResults items={items} viewMode={viewMode} />
+      )}
+    </div>
+  );
+}
+
+interface BrowseResultsProps {
+  items: typeof itemsApi.getAll extends (...args: any) => Promise<infer T>
+    ? T
+    : any[];
+  viewMode: "grid" | "list";
+}
+
+function BrowseResults({ items, viewMode }: BrowseResultsProps) {
+  const containerRef = useRef(null);
+
+  useGSAP(
+    () => {
+      const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+      tl.fromTo(
+        ".item-card-container",
+        { y: 20, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.6, stagger: 0.05 }
+      );
+    },
+    { scope: containerRef, dependencies: [items, viewMode] }
+  );
+
+  return (
+    <div ref={containerRef}>
+      {viewMode === "grid" ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {items.map((item) => (
+          {items.map((item: any) => (
             <Link
               key={item.id}
               to={`/listing/${item.id}`}
@@ -228,9 +255,13 @@ export default function BrowsePage() {
                       <div className="flex items-center justify-center gap-2">
                         <div className="text-xs text-white/90 flex items-center gap-1 font-medium bg-black/30 px-2 py-0.5 rounded-full backdrop-blur-sm">
                           <span className="text-yellow-400">★</span>
-                          <span>{item.metadata.rating.toFixed(1)}</span>
+                          <span>
+                            {Math.min(item.metadata?.rating || 0, 4.9).toFixed(
+                              1
+                            )}
+                          </span>
                           <span className="text-white/60">
-                            ({item.metadata.reviewCount})
+                            ({item.metadata?.reviewCount || 0})
                           </span>
                         </div>
                       </div>
@@ -281,7 +312,7 @@ export default function BrowsePage() {
         </div>
       ) : (
         <div className="space-y-4">
-          {items.map((item) => (
+          {items.map((item: any) => (
             <Link
               key={item.id}
               to={`/listing/${item.id}`}
@@ -316,10 +347,12 @@ export default function BrowsePage() {
                       </span>
                       <span className="text-gray-500 text-sm">/day</span>
                     </div>
-                    {item.metadata.rating > 0 && (
+                    {item.metadata?.rating > 0 && (
                       <div className="text-sm text-gray-500 flex items-center gap-1">
                         <span className="text-yellow-500">★</span>
-                        <span>{item.metadata.rating.toFixed(1)}</span>
+                        <span>
+                          {Math.min(item.metadata.rating, 4.9).toFixed(1)}
+                        </span>
                         <span className="text-gray-400">
                           ({item.metadata.reviewCount})
                         </span>

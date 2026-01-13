@@ -14,7 +14,6 @@ import {
   ArrowPathIcon,
 } from "@heroicons/react/24/outline";
 import { Button } from "@/components/ui/Button";
-import { useAuthStore } from "@/stores/authStore";
 import DroppingTextsGSAP from "@/components/layout/DroppingText";
 import ServiceCard from "@/components/layout/ServiceCard";
 import { ParallaxScroll } from "@/components/ui/ParallaxScroll";
@@ -29,7 +28,6 @@ export interface ServiceItemData {
 }
 
 export default function LandingPage() {
-  const { isAuthenticated } = useAuthStore();
 
   const defaultServices: ServiceItemData[] = [
     {
@@ -147,12 +145,30 @@ export default function LandingPage() {
     { scope: containerRef }
   );
 
+  useGSAP(
+    () => {
+      // Parallax effect for Hero Content
+      gsap.to(".hero-content", {
+        scrollTrigger: {
+          trigger: ".hero-section",
+          start: "top top",
+          end: "bottom top",
+          scrub: 1, // Smooth scrubbing
+        },
+        y: 200,
+        opacity: 0,
+        ease: "none",
+      });
+    },
+    { scope: containerRef }
+  );
+
   return (
     <div ref={containerRef} className="min-h-screen">
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-primary-50 to-primary-100 py-12 md:py-20 px-4">
-        <div className="max-w-7xl mx-auto text-center">
-          <h1 className="hero-titl text-4xl md:text-6xl font-bold text-gray-900 mb-6">
+      <section className="hero-section relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-primary-50 to-primary-100 px-4 pb-20">
+        <div className="hero-content max-w-7xl mx-auto text-center relative z-10">
+          <h1 className="hero-title text-4xl md:text-6xl font-bold text-gray-900 mb-6">
             {/* Borrow What You Need,
             <br />
             <span className="text-primary-600">Share What You Have</span> */}
@@ -174,15 +190,6 @@ export default function LandingPage() {
               <Button size="lg">Browse Items</Button>
             </Link>
           </div>
-          {!isAuthenticated && (
-            <div className="hero-cta mt-8 flex gap-4 justify-center">
-              <Link to="/signup">
-                <Button variant="outline" size="lg">
-                  List an Item
-                </Button>
-              </Link>
-            </div>
-          )}
         </div>
       </section>
       <ParallaxScroll />
@@ -210,38 +217,6 @@ export default function LandingPage() {
           <ServiceCard data={processSteps} className="mt-12" />
         </div>
       </section>
-
-      {/* CTA Section */}
-      {!isAuthenticated && (
-        <section className="cta-section py-20 px-4 bg-primary-600 text-white">
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-4xl font-bold mb-4">Ready to Get Started?</h2>
-            <p className="text-xl mb-8 text-primary-50">
-              Join thousands of people sharing items in their community.
-            </p>
-            <div className="flex gap-4 justify-center">
-              <Link to="/signup">
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="bg-white text-primary-600 hover:bg-primary-50"
-                >
-                  Sign Up Free
-                </Button>
-              </Link>
-              <Link to="/browse">
-                <Button
-                  variant="ghost"
-                  size="lg"
-                  className="text-white border-white hover:bg-primary-700"
-                >
-                  Browse Items
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </section>
-      )}
     </div>
   );
 }

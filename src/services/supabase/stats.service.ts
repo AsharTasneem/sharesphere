@@ -18,7 +18,7 @@ export const statsService = {
         .from("requests")
         .select("*", { count: "exact", head: true })
         .eq("borrower_id", userId)
-        .eq("status", "completed");
+        .in("status", ["active", "completed", "returned", "overdue"]);
 
       if (borrowedError) throw borrowedError;
 
@@ -27,7 +27,7 @@ export const statsService = {
         .from("requests")
         .select("*", { count: "exact", head: true })
         .eq("owner_id", userId)
-        .eq("status", "completed");
+        .in("status", ["active", "completed", "returned", "overdue"]);
 
       if (lentError) throw lentError;
 
@@ -40,9 +40,11 @@ export const statsService = {
       if (reviewsError) throw reviewsError;
 
       let averageRating = 0;
-      if (reviews && reviews.length > 0) {
-        const totalRating = reviews.reduce((sum, r) => sum + r.rating, 0);
-        averageRating = totalRating / reviews.length;
+      const reviewsList = reviews as any[] | null;
+
+      if (reviewsList && reviewsList.length > 0) {
+        const totalRating = reviewsList.reduce((sum, r) => sum + r.rating, 0);
+        averageRating = totalRating / reviewsList.length;
       }
 
       // 4. Response Rate (Placeholder logic for now, or could query messages/requests)
