@@ -7,6 +7,7 @@ import {
 import { AnimatedTooltip } from "@/components/layout/AnimatedTooltip";
 import Ashar from "@/public/images/ashar.png";
 import Hamza from "@/public/images/hamza.jpeg";
+import Shazaib from "@/public/images/shazaib.jpeg";
 import Nabeel from "@/public/images/nabeel.jpeg";
 
 interface FooterProps {
@@ -32,8 +33,7 @@ const Footer = ({ className = "" }: FooterProps) => {
       id: 3,
       name: "Shazaib Imran",
       designation: "SQA Engineer",
-      image:
-        "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fGF2YXRhcnxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=800&q=60",
+      image: Shazaib,
     },
     {
       id: 4,

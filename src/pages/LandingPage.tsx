@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/Button";
 import { useAuthStore } from "@/stores/authStore";
 import DroppingTextsGSAP from "@/components/layout/DroppingText";
 import ServiceCard from "@/components/layout/ServiceCard";
+import { ParallaxScroll } from "@/components/ui/ParallaxScroll";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -184,6 +185,7 @@ export default function LandingPage() {
           )}
         </div>
       </section>
+      <ParallaxScroll />
 
       {/* Benefits Section */}
       <section className="benefits-section pt-12 pb-2 md:pt-20 md:pb-4 px-4 bg-surface">
@@ -205,36 +207,6 @@ export default function LandingPage() {
           <h2 className="text-3xl font-bold text-center text-gray-900">
             How It Works
           </h2>
-          {/* <div className="grid md:grid-cols-3 gap-8">
-            <Card hoverEffect className="text-center h-full">
-              <div className="w-12 h-12 bg-primary-600 text-white rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold">
-                1
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Browse & Request</h3>
-              <p className="text-gray-600">
-                Search for items in your area and send a borrow request with
-                your dates.
-              </p>
-            </Card>
-            <Card hoverEffect className="text-center h-full">
-              <div className="w-12 h-12 bg-primary-600 text-white rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold">
-                2
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Connect & Arrange</h3>
-              <p className="text-gray-600">
-                Chat with the owner, confirm details, and arrange pickup time.
-              </p>
-            </Card>
-            <Card hoverEffect className="text-center h-full">
-              <div className="w-12 h-12 bg-primary-600 text-white rounded-full flex items-center justify-center mx-auto mb-4 text-xl font-bold">
-                3
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Borrow & Return</h3>
-              <p className="text-gray-600">
-                Pick up the item, use it, and return it on time. Leave a review!
-              </p>
-            </Card>
-          </div> */}
           <ServiceCard data={processSteps} className="mt-12" />
         </div>
       </section>
