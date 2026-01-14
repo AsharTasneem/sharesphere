@@ -298,7 +298,7 @@ export default function ProfilePage() {
                   />
                   {/* Country Select - Fixed to Pakistan */}
                   <div className="space-y-1">
-                    <label className="text-sm font-medium text-gray-700">
+                    <label className="text-sm font-medium text-gray-700 font-playfair">
                       Country
                     </label>
                     <Input
@@ -310,7 +310,7 @@ export default function ProfilePage() {
 
                   {/* State Select */}
                   <div className="space-y-1">
-                    <label className="text-sm font-medium text-gray-700">
+                    <label className="text-sm font-medium text-gray-700 font-playfair">
                       State / Province
                     </label>
                     <CustomSelect

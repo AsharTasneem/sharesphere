@@ -68,7 +68,7 @@ const DroppingTextsGSAP = () => {
   return (
     <div
       ref={containerRef}
-      className="w-full py-6 flex flex-col md:flex-row justify-center items-center overflow-hidden font-light leading-snug"
+      className="w-full py-6 flex flex-col md:flex-row justify-center items-center overflow-hidden leading-snug font-cormorant font-bold"
     >
       <span className="text-4xl lg:text-6xl font-bold text-primary-800 mr-4">
         A complete solution for
@@ -79,7 +79,7 @@ const DroppingTextsGSAP = () => {
           <div
             key={word}
             ref={(el) => (itemsRef.current[i] = el)}
-            className="col-start-1 row-start-1 text-4xl lg:text-6xl font-bold text-gray-900"
+            className="col-start-1 row-start-1 text-4xl lg:text-6xl text-gray-900"
             style={{
               opacity: 0,
               whiteSpace: "nowrap",

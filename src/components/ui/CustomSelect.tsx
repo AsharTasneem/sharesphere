@@ -193,7 +193,10 @@ export const CustomSelect = ({
   };
 
   return (
-    <div ref={dropdownRef} className={cn("relative w-full", className)}>
+    <div
+      ref={dropdownRef}
+      className={cn("relative w-full", className, "font-playfair")}
+    >
       {/* Trigger Button */}
       <button
         type="button"
