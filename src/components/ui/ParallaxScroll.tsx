@@ -5,6 +5,24 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { cn } from "@/lib/utils";
 
+import img_1 from "@/assets/images/img_1.png";
+import img_2 from "@/assets/images/img_2.png";
+import img_3 from "@/assets/images/img_3.png";
+import img_4 from "@/assets/images/img_4.png";
+import img_5 from "@/assets/images/img_5.png";
+import img_6 from "@/assets/images/img_6.png";
+import img_7 from "@/assets/images/img_7.png";
+import img_8 from "@/assets/images/img_8.png";
+import img_9 from "@/assets/images/img_9.png";
+import img_10 from "@/assets/images/img_10.png";
+import img_11 from "@/assets/images/img_11.png";
+import img_12 from "@/assets/images/img_12.png";
+import img_13 from "@/assets/images/img_13.png";
+import img_14 from "@/assets/images/img_14.png";
+import img_15 from "@/assets/images/img_15.png";
+import img_16 from "@/assets/images/img_16.png";
+import img_17 from "@/assets/images/img_17.png";
+
 gsap.registerPlugin(ScrollTrigger);
 
 export const ParallaxScroll = ({
