@@ -56,7 +56,7 @@ const Footer = ({ className = "" }: FooterProps) => {
               <div className="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-xl">S</span>
               </div>
-              <span className="text-2xl font-bold text-gray-900">
+              <span className="text-2xl font-bold text-gray-900 font-playfair">
                 ShareSphere
               </span>
             </div>

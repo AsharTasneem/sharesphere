@@ -19,7 +19,11 @@ export default {
         surface: "#FFFFFF",
       },
       fontFamily: {
-        sans: ["Inter", "system-ui", "sans-serif"],
+        sans: ["Fira Sans", "sans-serif"],
+        cormorant: ["Cormorant", "Cormorant Garamond", "serif"],
+        tino: ["Tino", "serif"],
+        playfair: ["Playfair Display", "serif"],
+        fira: ["Fira Sans", "sans-serif"],
       },
     },
   },

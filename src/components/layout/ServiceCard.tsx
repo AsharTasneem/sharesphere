@@ -87,7 +87,10 @@ const ServiceCardItem = ({ service }: { service: ServiceItemData }) => {
           </h3>
 
           {/* Description */}
-          <p ref={descRef} className="text-sm text-gray-600">
+          <p
+            ref={descRef}
+            className="text-md text-gray-600 font-playfair font-medium text-justify"
+          >
             {service.description}
           </p>
         </div>

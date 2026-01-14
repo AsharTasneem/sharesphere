@@ -28,7 +28,6 @@ export interface ServiceItemData {
 }
 
 export default function LandingPage() {
-
   const defaultServices: ServiceItemData[] = [
     {
       icon: <UserGroupIcon className="w-6 h-6" />,
@@ -174,7 +173,7 @@ export default function LandingPage() {
             <span className="text-primary-600">Share What You Have</span> */}
             <DroppingTextsGSAP />
           </h1>
-          <p className="hero-subtitle text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+          <p className="hero-subtitle text-xl text-gray-600 mb-8 max-w-2xl mx-auto font-cormorant">
             Connect with your community to borrow and lend items. Save money,
             reduce waste, and build connections.
           </p>
@@ -183,11 +182,13 @@ export default function LandingPage() {
               <input
                 type="text"
                 placeholder="What are you looking for?"
-                className="w-full px-6 py-4 rounded-full border border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-500 focus:ring-opacity-20 outline-none text-lg"
+                className="w-full px-6 py-4 rounded-full border border-gray-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-500 focus:ring-opacity-20 outline-none text-lg font-cormorant font-medium"
               />
             </div>
             <Link to="/browse">
-              <Button size="lg">Browse Items</Button>
+              <Button size="lg" className="font-cormorant font-bold">
+                Browse Items
+              </Button>
             </Link>
           </div>
         </div>
