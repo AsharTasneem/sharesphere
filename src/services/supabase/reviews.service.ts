@@ -28,9 +28,6 @@ export const supabaseReviewsService = {
     return data.map((review) =>
       dbReviewToReview(review, review.reviewer || undefined)
     );
-    return data.map((review) =>
-      dbReviewToReview(review, review.reviewer || undefined)
-    );
   },
 
   /**

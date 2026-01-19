@@ -24,6 +24,7 @@ import LendingHistoryPage from "@/pages/LendingHistoryPage";
 import RequestDetailPage from "@/pages/RequestDetailPage";
 import PublicProfilePage from "@/pages/PublicProfilePage";
 import RouteChangeLoader from "@/components/layout/RouteChangeLoader";
+import Loader from "@/components/layout/Loader";
 
 // Layout wrapper components
 function PublicLayout() {
@@ -49,6 +50,12 @@ function App() {
   useEffect(() => {
     initialize();
   }, [initialize]);
+
+  const { loading } = useAuthStore();
+
+  if (loading) {
+    return <Loader />;
+  }
 
   return (
     <LenisProvider>
