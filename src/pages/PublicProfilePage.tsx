@@ -1,4 +1,5 @@
 import { useParams, Link } from "react-router-dom";
+import Loader from "@/components/layout/Loader";
 import { useQuery } from "@tanstack/react-query";
 import { authApi, itemsApi } from "@/services/api";
 import { Card } from "@/components/ui/Card";
@@ -41,11 +42,7 @@ export default function PublicProfilePage() {
   });
 
   if (userLoading) {
-    return (
-      <div className="max-w-6xl mx-auto px-4 py-12 flex justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600" />
-      </div>
-    );
+    return <Loader />;
   }
 
   if (!user || userError) {

@@ -26,6 +26,39 @@ export function Navbar({ showSidebarToggle = false }: NavbarProps) {
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const navRef = useRef<HTMLElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const dropdownTimeline = useRef<gsap.core.Timeline | null>(null);
+
+  const { contextSafe } = useGSAP({ scope: navRef });
+
+  const handleDropdownEnter = contextSafe(() => {
+    if (!dropdownRef.current) return;
+
+    gsap.to(dropdownRef.current, {
+      opacity: 1,
+      y: 0,
+      duration: 0.3,
+      ease: "power2.out",
+      visibility: "visible",
+      overwrite: true,
+    });
+  });
+
+  const handleDropdownLeave = contextSafe(() => {
+    if (!dropdownRef.current) return;
+
+    gsap.to(dropdownRef.current, {
+      opacity: 0,
+      y: -10,
+      duration: 0.2,
+      ease: "power2.in",
+      onComplete: () => {
+        if (dropdownRef.current)
+          dropdownRef.current.style.visibility = "hidden";
+      },
+      overwrite: true,
+    });
+  });
 
   useEffect(() => {
     const handleScroll = () => {
@@ -156,7 +189,11 @@ export function Navbar({ showSidebarToggle = false }: NavbarProps) {
                 )}
               </button>
 
-              <div className="relative group">
+              <div
+                className="relative group"
+                onMouseEnter={handleDropdownEnter}
+                onMouseLeave={handleDropdownLeave}
+              >
                 <button className="flex items-center gap-2 p-2 rounded-full hover:bg-gray-100 transition-colors">
                   {user?.avatar ? (
                     <img
@@ -175,7 +212,10 @@ export function Navbar({ showSidebarToggle = false }: NavbarProps) {
                     </div>
                   )}
                 </button>
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all">
+                <div
+                  ref={dropdownRef}
+                  className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 opacity-0 invisible -translate-y-2 z-50"
+                >
                   <Link
                     to="/dashboard"
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"

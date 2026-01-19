@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useLenis } from "@/providers/LenisProvider";
 import {
   EnvelopeIcon,
   PhoneIcon,
@@ -15,6 +16,7 @@ interface FooterProps {
 }
 
 const Footer = ({ className = "" }: FooterProps) => {
+  const lenis = useLenis();
   const currentYear = new Date().getFullYear();
   const people = [
     {
@@ -52,7 +54,10 @@ const Footer = ({ className = "" }: FooterProps) => {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-24 gap-y-12 lg:gap-12">
           {/* Brand Section */}
           <div className="col-span-1">
-            <div className="flex items-center gap-2 mb-4">
+            <div
+              className="flex items-center gap-2 mb-4 cursor-pointer"
+              onClick={() => lenis?.scrollTo(0)}
+            >
               <div className="w-10 h-10 bg-primary-600 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-xl">S</span>
               </div>
