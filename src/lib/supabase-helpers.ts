@@ -18,6 +18,7 @@ export function dbProfileToUser(profile: Tables<"profiles">): User {
     id: profile.id,
     email: profile.email,
     name: profile.name,
+    username: profile.username || undefined,
     avatar: profile.avatar || undefined,
     bio: profile.bio || undefined,
     phone: profile.phone || undefined,

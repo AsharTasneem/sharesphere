@@ -35,6 +35,23 @@ const DEFAULT_PROFILE_DATA = {
   payout_verified: false,
 };
 
+// Helper to generate a username from name or email
+const generateUsername = (name: string, email?: string): string => {
+  const base = name ? name : email?.split("@")[0] || "user";
+  // Allow alphanumeric, dot, and underscore. Remove spaces and other specials.
+  // Replace spaces with underscores for better readability if desired, or just strip invalid chars.
+  // Here we strip invalid chars but keep dots and underscores if present in input.
+  // Actually, usually we might want to replace spaces with underscores.
+  const cleanBase = base
+    .toLowerCase()
+    .replace(/[^a-z0-9._]/g, "")
+    .replace(/\s+/g, "_");
+
+  // Add 4 random digits to ensure uniqueness
+  const randomSuffix = Math.floor(1000 + Math.random() * 9000).toString();
+  return `${cleanBase}${randomSuffix}`;
+};
+
 export const supabaseAuthService = {
   /**
    * Sign in with email and password
@@ -70,6 +87,10 @@ export const supabaseAuthService = {
           authData.user.user_metadata?.name ||
           authData.user.email?.split("@")[0] ||
           "User",
+        username: generateUsername(
+          authData.user.user_metadata?.name,
+          authData.user.email
+        ),
       };
 
       const { data: createdProfile, error: createError } = (await supabase
@@ -142,6 +163,7 @@ export const supabaseAuthService = {
         id: authData.user.id,
         email: data.email,
         name: data.name,
+        username: generateUsername(data.name, data.email),
       };
 
       const { data: createdProfile, error: createError } = (await supabase
@@ -198,6 +220,10 @@ export const supabaseAuthService = {
             session.user.user_metadata?.name ||
             session.user.email?.split("@")[0] ||
             "User",
+          username: generateUsername(
+            session.user.user_metadata?.name,
+            session.user.email
+          ),
         };
 
         const { data: createdProfile, error: createError } = (await supabase
@@ -250,6 +276,7 @@ export const supabaseAuthService = {
     const updates: Record<string, unknown> = {};
 
     if (data.name) updates.name = data.name;
+    if (data.username) updates.username = data.username;
     if (data.bio !== undefined) updates.bio = data.bio;
     if (data.phone !== undefined) updates.phone = data.phone;
     if (data.avatar !== undefined) updates.avatar = data.avatar;
@@ -303,5 +330,43 @@ export const supabaseAuthService = {
   updateEmail: async (email: string): Promise<void> => {
     const { error } = await supabase.auth.updateUser({ email });
     if (error) throw error;
+  },
+
+  /**
+   * Get public profile by ID
+   */
+  getById: async (userId: string): Promise<User | null> => {
+    const { data: profile, error } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", userId)
+      .single();
+
+    if (error) {
+      // Ignore "Row not found" error, return null
+      if (error.code === "PGRST116") return null;
+      console.error("Error fetching user profile:", error);
+      return null;
+    }
+
+    return dbProfileToUser(profile);
+  },
+
+  /**
+   * Search users by username or name
+   */
+  search: async (query: string): Promise<User[]> => {
+    const { data: profiles, error } = await supabase
+      .from("profiles")
+      .select("*")
+      .or(`username.ilike.%${query}%,name.ilike.%${query}%`)
+      .limit(20);
+
+    if (error) {
+      console.error("Error searching users:", error);
+      return [];
+    }
+
+    return (profiles || []).map(dbProfileToUser);
   },
 };

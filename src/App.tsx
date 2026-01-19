@@ -22,6 +22,7 @@ import BorrowedPage from "@/pages/BorrowedPage";
 import LendingHistoryPage from "@/pages/LendingHistoryPage";
 
 import RequestDetailPage from "@/pages/RequestDetailPage";
+import PublicProfilePage from "@/pages/PublicProfilePage";
 import RouteChangeLoader from "@/components/layout/RouteChangeLoader";
 
 // Layout wrapper components
@@ -164,6 +165,8 @@ function App() {
                 </ProtectedRoute>
               }
             />
+
+            <Route path="/profile/:id" element={<PublicProfilePage />} />
           </Route>
         </Routes>
       </RouteChangeLoader>

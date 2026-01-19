@@ -30,6 +30,14 @@ export const authApi = {
   getCurrentUser: async (): Promise<User | null> => {
     return supabaseAuthService.getCurrentUser();
   },
+
+  getById: async (id: string): Promise<User | null> => {
+    return supabaseAuthService.getById(id);
+  },
+
+  search: async (query: string): Promise<User[]> => {
+    return supabaseAuthService.search(query);
+  },
 };
 
 // Items API - Now using Supabase
@@ -40,6 +48,7 @@ export const itemsApi = {
     maxPrice?: number;
     search?: string;
     sort?: string;
+    ownerId?: string;
   }): Promise<Item[]> => {
     return supabaseItemsService.getAll(filters);
   },

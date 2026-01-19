@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { ITEM_CONDITIONS } from "@/lib/constants";
-import { StarIcon, MapPinIcon, CalendarIcon } from "@heroicons/react/24/solid";
+import { StarIcon, MapPinIcon } from "@heroicons/react/24/solid";
 import { StarIcon as StarOutlineIcon } from "@heroicons/react/24/outline";
 import { EditListingModal } from "@/components/listings/EditListingModal";
 
@@ -249,7 +249,7 @@ export default function ListingDetailPage() {
                 </span>
               </div>
             </div>
-            <Link to={`/user/${item.owner.id}`}>
+            <Link to={`/profile/${item.owner.id}`}>
               <Button variant="outline">View Profile</Button>
             </Link>
           </div>
