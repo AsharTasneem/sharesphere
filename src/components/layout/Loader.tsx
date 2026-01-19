@@ -56,12 +56,13 @@ const ShareSphereGSAP = () => {
             className="
               inline-block
               text-3xl md:text-4xl
-              font-extrabold
+              font-bold
               tracking-wider
               text-primary-600
               drop-shadow-[0_6px_12px_rgba(219,133,131,0.35)]
               transition-colors
               duration-300
+              font-playfair
             "
           >
             {letter}

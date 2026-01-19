@@ -6,6 +6,7 @@ interface AuthStore {
   user: User | null;
   isAuthenticated: boolean;
   loading: boolean;
+  initialized: boolean;
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (data: {
     email: string;
@@ -22,11 +23,15 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
   user: null,
   isAuthenticated: false,
   loading: true,
+  initialized: false,
 
   initialize: async () => {
+    const { initialized } = get();
+    if (initialized) return;
+
     try {
       const user = await supabaseAuthService.getCurrentUser();
-      set({ user, isAuthenticated: !!user, loading: false });
+      set({ user, isAuthenticated: !!user, loading: false, initialized: true });
 
       // Set up auth state change listener
       supabaseAuthService.onAuthStateChange((user) => {
@@ -34,7 +39,12 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       });
     } catch (error) {
       console.error("Auth initialization error:", error);
-      set({ user: null, isAuthenticated: false, loading: false });
+      set({
+        user: null,
+        isAuthenticated: false,
+        loading: false,
+        initialized: true,
+      });
     }
   },
 
