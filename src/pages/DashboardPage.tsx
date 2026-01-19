@@ -13,6 +13,9 @@ import {
   CurrencyDollarIcon,
   ClockIcon,
 } from "@heroicons/react/24/outline";
+import { ReviewRequestModal } from "@/components/dashboard/ReviewRequestModal";
+import type { Request } from "@/lib/types";
+import { useState } from "react";
 
 export default function DashboardPage() {
   const { user, refreshUser } = useAuthStore();
@@ -21,6 +24,9 @@ export default function DashboardPage() {
   useEffect(() => {
     refreshUser();
   }, []);
+
+  const [selectedRequest, setSelectedRequest] = useState<Request | null>(null);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
   const { data: borrowerRequests = [] } = useQuery({
     queryKey: ["requests", "borrower", user?.id],
@@ -183,9 +189,14 @@ export default function DashboardPage() {
                       {formatCurrency(request.pricing.total)} total
                     </p>
                   </div>
-                  <Link to={`/dashboard/my-listings/${request.itemId}`}>
-                    <Button>Review Request</Button>
-                  </Link>
+                  <Button
+                    onClick={() => {
+                      setSelectedRequest(request);
+                      setIsReviewModalOpen(true);
+                    }}
+                  >
+                    Review Request
+                  </Button>
                 </div>
               </Card>
             ))}
@@ -220,6 +231,11 @@ export default function DashboardPage() {
           <p className="text-gray-600 text-sm">No recent activity</p>
         </Card>
       </div>
+      <ReviewRequestModal
+        isOpen={isReviewModalOpen}
+        onClose={() => setIsReviewModalOpen(false)}
+        request={selectedRequest}
+      />
     </div>
   );
 }

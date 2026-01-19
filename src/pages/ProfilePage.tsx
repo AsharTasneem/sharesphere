@@ -1,8 +1,6 @@
 import { useState, useRef } from "react";
 import { useAuthStore } from "@/stores/authStore";
-import { supabaseAuthService } from "@/services/supabase/auth.service";
 import { supabaseStorageService } from "@/services/supabase/storage.service";
-import { Modal } from "@/components/ui/Modal";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -61,12 +59,13 @@ export default function ProfilePage() {
     };
 
   const [name, setName] = useState(user?.name || "");
+  const [username, setUsername] = useState(user?.username || "");
   const [bio, setBio] = useState(user?.bio || "");
   const [phone, setPhone] = useState(user?.phone || "");
   const [address, setAddress] = useState(user?.location?.address || "");
   const [city, setCity] = useState(user?.location?.city || "");
   const [state, setState] = useState(user?.location?.state || "");
-  const [country, setCountry] = useState(user?.location?.country || "Pakistan");
+  // Country is fixed to Pakistan, no state needed
 
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -80,7 +79,6 @@ export default function ProfilePage() {
   // Initialize dropdowns when editing starts or user data loads
   useEffect(() => {
     // Always set country to Pakistan
-    setCountry("Pakistan");
     setCountryCode("PK");
 
     // Only load state/city if the saved country was also Pakistan (otherwise current state/city are invalid)
@@ -112,10 +110,24 @@ export default function ProfilePage() {
     setError(null); // Clear previous errors
     let profileUpdated = false;
 
+    // Validate username if provided
+    if (username) {
+      // Allow alphanumeric, dot, underscore. No spaces.
+      const usernameRegex = /^[a-zA-Z0-9._]+$/;
+      if (!usernameRegex.test(username)) {
+        setError(
+          "Username can only contain letters, numbers, dots (.), and underscores (_)."
+        );
+        setSaving(false);
+        return;
+      }
+    }
+
     try {
       // 1. Update Profile Data
       await updateProfile({
         name,
+        username,
         bio,
         phone,
         location: {
@@ -274,6 +286,12 @@ export default function ProfilePage() {
                     onChange={(e) => setName(e.target.value)}
                     required
                   />
+                  <Input
+                    label="Username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="username"
+                  />
                 </div>
                 <Textarea
                   label="Bio"
@@ -366,17 +384,19 @@ export default function ProfilePage() {
                   </div>
                 )}
                 <div className="flex gap-3">
-                  <Button onClick={handleSave}>Save Changes</Button>
+                  <Button onClick={handleSave} disabled={saving}>
+                    {saving ? "Saving..." : "Save Changes"}
+                  </Button>
                   <Button
                     variant="outline"
                     onClick={() => {
                       setName(user.name);
+                      setUsername(user.username || "");
                       setBio(user.bio || "");
                       setPhone(user.phone || "");
                       setAddress(user.location.address || "");
                       setCity(user.location.city || "");
                       setState(user.location.state || "");
-                      setCountry(user.location.country || "");
                       setEditing(false);
                     }}
                   >
@@ -386,10 +406,15 @@ export default function ProfilePage() {
               </div>
             ) : (
               <>
-                <div className="flex items-center gap-2 mb-3">
-                  <h2 className="text-3xl font-bold text-gray-900">
+                <div className="flex flex-col mb-3">
+                  <h2 className="text-3xl font-bold text-gray-900 leading-tight">
                     {user.name}
                   </h2>
+                  {user.username && (
+                    <span className="text-lg text-gray-500 font-medium">
+                      @{user.username}
+                    </span>
+                  )}
                 </div>
                 {user.bio ? (
                   <p className="text-gray-600 mb-4 leading-relaxed">

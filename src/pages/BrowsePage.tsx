@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useSearchParams } from "react-router-dom";
-import { itemsApi } from "@/services/api";
+import { itemsApi, authApi } from "@/services/api";
+import { useDebounce } from "@/hooks/useDebounce";
 import { Card } from "@/components/ui/Card";
 import RotatingCard from "@/components/ui/RotatingCards";
 import { Input } from "@/components/ui/Input";
@@ -25,11 +26,30 @@ export default function BrowsePage() {
   const [category, setCategory] = useState(searchParams.get("category") || "");
   const [sort, setSort] = useState(searchParams.get("sort") || "newest");
 
-  const { data: items = [], isLoading } = useQuery({
-    queryKey: ["items", { search, category, sort }],
+  // Debounce search term to prevent excessive API calls
+  const debouncedSearch = useDebounce(search, 500);
+
+  const isUserSearch = debouncedSearch.startsWith("@");
+  const userQuery = isUserSearch ? debouncedSearch.substring(1) : "";
+
+  const { data: items = [], isLoading: isItemsLoading } = useQuery({
+    queryKey: ["items", { search: debouncedSearch, category, sort }],
     queryFn: () =>
-      itemsApi.getAll({ search, category: category || undefined, sort }),
+      itemsApi.getAll({
+        search: debouncedSearch,
+        category: category || undefined,
+        sort,
+      }),
+    enabled: !isUserSearch,
   });
+
+  const { data: users = [], isLoading: isUsersLoading } = useQuery({
+    queryKey: ["users", userQuery],
+    queryFn: () => authApi.search(userQuery),
+    enabled: isUserSearch && userQuery.length > 0,
+  });
+
+  const isLoading = isUserSearch ? isUsersLoading : isItemsLoading;
 
   const handleSearch = (value: string) => {
     setSearch(value);
@@ -45,7 +65,8 @@ export default function BrowsePage() {
 
   const containerRef = useRef(null);
 
-  const showSkeleton = isLoading && items.length === 0;
+  const showSkeleton =
+    isLoading && (items.length === 0 || (isUserSearch && users.length === 0));
 
   useGSAP(
     () => {
@@ -183,11 +204,63 @@ export default function BrowsePage() {
             </div>
           ))}
         </div>
-      ) : items.length === 0 ? (
+      ) : items.length === 0 && !isUserSearch ? (
         <div className="text-center py-12">
           <p className="text-gray-600 text-lg mb-4">No items found</p>
           <p className="text-gray-500">Try adjusting your search or filters</p>
         </div>
+      ) : isUserSearch ? (
+        users.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-gray-600 text-lg mb-4">No users found</p>
+            <p className="text-gray-500">
+              Try searching for a different username
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {users.map((user: any) => (
+              <Link
+                key={user.id}
+                to={`/profile/${user.id}`}
+                className="block hover:scale-105 transition-transform duration-300"
+              >
+                <Card className="h-full flex flex-col items-center p-6 text-center hover:shadow-xl transition-shadow border-primary-100">
+                  {user.avatar ? (
+                    <img
+                      src={user.avatar}
+                      alt={user.name}
+                      className="w-24 h-24 rounded-full border-4 border-white shadow-md object-cover mb-4"
+                    />
+                  ) : (
+                    <div className="w-24 h-24 rounded-full border-4 border-white shadow-md bg-primary-100 flex items-center justify-center text-primary-600 text-3xl font-bold mb-4">
+                      {user.name
+                        ?.split(" ")
+                        .map((n: string) => n[0])
+                        .join("")
+                        .toUpperCase()
+                        .slice(0, 2) || "U"}
+                    </div>
+                  )}
+                  <h3 className="text-lg font-bold text-gray-900 mb-1">
+                    {user.name}
+                  </h3>
+                  {user.username && (
+                    <p className="text-primary-600 text-sm font-medium mb-2">
+                      @{user.username}
+                    </p>
+                  )}
+                  <div className="flex items-center gap-1 text-gray-500 text-xs mt-auto">
+                    <span>
+                      Member since{" "}
+                      {new Date(user.createdAt || Date.now()).getFullYear()}
+                    </span>
+                  </div>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        )
       ) : (
         <BrowseResults items={items} viewMode={viewMode} />
       )}
