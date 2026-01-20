@@ -369,4 +369,26 @@ export const supabaseAuthService = {
 
     return (profiles || []).map(dbProfileToUser);
   },
+
+  /**
+   * Request password reset email
+   */
+  requestPasswordReset: async (email: string): Promise<void> => {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+
+    if (error) throw error;
+  },
+
+  /**
+   * Reset password with new password
+   */
+  resetPassword: async (newPassword: string): Promise<void> => {
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword,
+    });
+
+    if (error) throw error;
+  },
 };

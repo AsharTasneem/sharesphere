@@ -17,6 +17,8 @@ interface AuthStore {
   updateProfile: (data: Partial<User>) => Promise<void>;
   refreshUser: () => Promise<void>;
   initialize: () => Promise<void>;
+  requestPasswordReset: (email: string) => Promise<void>;
+  resetPassword: (newPassword: string) => Promise<void>;
 }
 
 export const useAuthStore = create<AuthStore>((set, get) => ({
@@ -102,6 +104,24 @@ export const useAuthStore = create<AuthStore>((set, get) => ({
       set({ user: updatedUser });
     } catch (error) {
       console.error("Update profile error:", error);
+      throw error;
+    }
+  },
+
+  requestPasswordReset: async (email: string) => {
+    try {
+      await supabaseAuthService.requestPasswordReset(email);
+    } catch (error) {
+      console.error("Request password reset error:", error);
+      throw error;
+    }
+  },
+
+  resetPassword: async (newPassword: string) => {
+    try {
+      await supabaseAuthService.resetPassword(newPassword);
+    } catch (error) {
+      console.error("Reset password error:", error);
       throw error;
     }
   },
